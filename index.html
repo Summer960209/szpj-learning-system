@@ -11,13 +11,13 @@
   ║  区域: 新加坡 (ap-southeast-1) | 计划: Free                 ║
   ║  数据库表: users, app_data, class_config                    ║
   ║  功能: RLS 行级安全 + Realtime 实时同步                      ║
-  ║  管理面板: https://supabase.com/dashboard/project/xauprfpcgrvzeeqnsepe ║
+  ║  管理面板: https://db.com/dashboard/project/xauprfpcgrvzeeqnsepe ║
   ╚══════════════════════════════════════════════════════════════╝
 -->
 <script>
 // ── Supabase 配置（已自动部署，项目：金华市外国语学校思政学习系统，区域：新加坡）──
 const SUPABASE_CONFIG = {
-  url: 'https://xauprfpcgrvzeeqnsepe.supabase.co',
+  url: 'https://xauprfpcgrvzeeqnsepe.db.co',
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhdXByZnBjZ3J2emVlcW5zZXBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDI5MjIsImV4cCI6MjA5NDgxODkyMn0.ck7VlPV7gFKcKCG6Vl7nmf3oxCX_8PmVtPC4wXqf6NE'
 };
 
@@ -867,7 +867,7 @@ nav{
 // ================================================================
 // SUPABASE CLOUD SYNC MODULE
 // ================================================================
-let supabase = null;
+let db = null;
 let currentClassCode = '';
 let currentUserRole = '';
 let currentUserName = '';
@@ -884,7 +884,7 @@ function initSupabase(){
       console.log('[Cloud] 未配置 Supabase，使用本地模式');
       return;
     }
-    supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+    db = window.db.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
     cloudConnected = true;
     console.log('[Cloud] Supabase 客户端初始化成功');
     // Restore last login
@@ -943,11 +943,11 @@ async function handleLogin(){
             showLoginError('管理密码错误'); setStatus(''); return;
           }
           // Update teacher name
-          await supabase.from('class_config').update({teacher_name:name}).eq('class_code',classCode);
+          await db.from('class_config').update({teacher_name:name}).eq('class_code',classCode);
         } else {
           // Create new class
           if(!password){ showLoginError('首次创建班级请设置管理密码'); setStatus(''); return; }
-          const {error: ce} = await supabase.from('class_config').insert({
+          const {error: ce} = await db.from('class_config').insert({
             class_code:classCode, teacher_name:name, teacher_password:password
           });
           if(ce){ showLoginError('创建班级失败: '+ce.message); setStatus(''); return; }
@@ -958,7 +958,7 @@ async function handleLogin(){
       }
 
       // Register/login user
-      await supabase.from('users').upsert({
+      await db.from('users').upsert({
         name, role:currentUserRole, class_code:classCode,
         password:currentUserRole==='teacher'?password:null
       }, {onConflict:'id'});
@@ -1004,7 +1004,7 @@ function setStatus(msg){
 async function cloudWrite(key, data){
   if(!cloudConnected||!currentClassCode) return;
   try{
-    await supabase.from('app_data').upsert({
+    await db.from('app_data').upsert({
       class_code:currentClassCode, key, data,
       updated_at: new Date().toISOString()
     }, {onConflict:'class_code,key'});
@@ -1014,7 +1014,7 @@ async function cloudWrite(key, data){
 async function cloudRead(key){
   if(!cloudConnected||!currentClassCode) return null;
   try{
-    const {data} = await supabase.from('app_data')
+    const {data} = await db.from('app_data')
       .select('data,updated_at')
       .eq('class_code',currentClassCode)
       .eq('key',key)
@@ -1038,7 +1038,7 @@ async function loadCloudData(){
     saveQBank();
   }
   // Load student data
-  const {data: rows} = await supabase.from('app_data')
+  const {data: rows} = await db.from('app_data')
     .select('key,data,updated_at')
     .eq('class_code',currentClassCode)
     .like('key','student_%');
@@ -1476,7 +1476,7 @@ function getStudent(name){
 // ================================================================
 function backToRole(){
   if(cloudConnected && realtimeChannel){
-    supabase.removeChannel(realtimeChannel);
+    db.removeChannel(realtimeChannel);
     realtimeChannel = null;
   }
   saveData();
