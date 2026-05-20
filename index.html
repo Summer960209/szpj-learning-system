@@ -480,16 +480,39 @@ nav{
         </div>
       </div>
     </div>
-    <div id="loginPasswordField" style="margin-bottom:16px;display:none">
-      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">管理密码</label>
-      <input id="loginPassword" type="password" placeholder="教师设置的管理密码"
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">登录密码</label>
+      <input id="loginPassword" type="password" placeholder="请输入密码（初始密码：888888）"
         style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none"
         onkeydown="if(event.key==='Enter')handleLogin()">
-      <p style="font-size:11px;color:var(--gray-400);margin-top:4px">首次使用将自动创建班级，此密码即为班级管理密码</p>
     </div>
     <button class="btn-primary" style="width:100%;padding:12px;font-size:14px;border-radius:var(--r-sm)" onclick="handleLogin()">进入系统</button>
     <div id="loginError" style="margin-top:10px;text-align:center;font-size:12px;color:var(--coral);display:none"></div>
     <div id="loginStatus" style="margin-top:10px;text-align:center;font-size:11px;color:var(--gray-400)"></div>
+  </div>
+</div>
+
+<!-- ===== CHANGE PASSWORD MODAL ===== -->
+<div id="changePasswordModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center">
+  <div style="background:var(--white);border-radius:var(--r);padding:32px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.15)">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:36px;margin-bottom:8px">🔐</div>
+      <h2 style="font-size:18px;font-weight:600;color:var(--gray-900)">修改密码</h2>
+      <p style="font-size:13px;color:var(--gray-400);margin-top:6px">首次登录请设置您的新密码</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">新密码</label>
+      <input id="newPassword" type="password" placeholder="请输入新密码（至少6位）"
+        style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none">
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">确认密码</label>
+      <input id="confirmPassword" type="password" placeholder="请再次输入新密码"
+        style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none"
+        onkeydown="if(event.key==='Enter')handleChangePassword()">
+    </div>
+    <div id="changePwdError" style="margin-bottom:12px;text-align:center;font-size:12px;color:var(--coral);display:none"></div>
+    <button class="btn-primary" style="width:100%;padding:12px;font-size:14px;border-radius:var(--r-sm)" onclick="handleChangePassword()">确认修改并进入系统</button>
   </div>
 </div>
 
@@ -904,7 +927,6 @@ function selectLoginRole(role){
   currentUserRole = role;
   document.getElementById('loginRoleTeacher').classList.toggle('selected', role==='teacher');
   document.getElementById('loginRoleStudent').classList.toggle('selected', role==='student');
-  document.getElementById('loginPasswordField').style.display = role==='teacher'?'block':'none';
 }
 
 // ── Login handler ──
@@ -917,12 +939,21 @@ async function handleLogin(){
   if(!classCode){ showLoginError('请输入班级码'); return; }
   if(!name){ showLoginError('请输入姓名'); return; }
   if(!currentUserRole){ showLoginError('请选择登录身份'); return; }
+  if(!password){ showLoginError('请输入密码'); return; }
+
+  // Check password: default is 888888, or user-changed password
+  const userKey = `${classCode}_${currentUserRole}_${name}`;
+  const savedPassword = localStorage.getItem('szpj_pwd_'+userKey) || '888888';
+  if(password !== savedPassword){
+    showLoginError('密码错误（初始密码：888888）'); return;
+  }
 
   errEl.style.display='none';
   setStatus('正在连接...');
 
   currentClassCode = classCode;
   currentUserName = name;
+  currentRole = currentUserRole;
 
   // Save login info
   localStorage.setItem('szpj_lastlogin', JSON.stringify({classCode, name, role:currentUserRole}));
@@ -930,65 +961,101 @@ async function handleLogin(){
   if(cloudConnected){
     try{
       if(currentUserRole==='teacher'){
-        // Check if class exists
-        const {data: cls, error} = await supabase
+        const {data: cls} = await supabase
           .from('class_config')
           .select('*')
           .eq('class_code', classCode)
           .maybeSingle();
-
-        if(cls){
-          // Existing class: verify password
-          if(cls.teacher_password !== password){
-            showLoginError('管理密码错误'); setStatus(''); return;
-          }
-          // Update teacher name
-          await supabase.from('class_config').update({teacher_name:name}).eq('class_code',classCode);
-        } else {
-          // Create new class
-          if(!password){ showLoginError('首次创建班级请设置管理密码'); setStatus(''); return; }
-          const {error: ce} = await supabase.from('class_config').insert({
-            class_code:classCode, teacher_name:name, teacher_password:password
+        if(!cls){
+          await supabase.from('class_config').insert({
+            class_code:classCode, teacher_name:name, teacher_password:'888888'
           });
-          if(ce){ showLoginError('创建班级失败: '+ce.message); setStatus(''); return; }
-          // Seed default books/qbank
           await cloudWrite('books', DEFAULT_BOOKS);
           await cloudWrite('qbank', DEFAULT_QBANK);
         }
       }
-
-      // Register/login user
       await supabase.from('users').upsert({
         name, role:currentUserRole, class_code:classCode,
-        password:currentUserRole==='teacher'?password:null
+        password:currentUserRole==='teacher'?savedPassword:'888888'
       }, {onConflict:'id'});
 
-      // Load cloud data
       setStatus('正在同步数据...');
       await loadCloudData();
       startRealtime();
-      setStatus('✓ 云端已连接');
+      setStatus('云端已连接');
       setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
     }catch(e){
       console.warn('[Cloud] 登录同步失败，使用本地数据:', e);
-      setStatus('⚠ 云端连接失败，使用本地数据');
     }
-  } else {
-    setStatus('本地模式（未配置云端）');
   }
 
-  // Enter app
+  // If password is still default 888888, force password change
+  if(savedPassword === '888888'){
+    showChangePasswordModal();
+  } else {
+    enterApp();
+  }
+}
+
+function enterApp(){
   document.getElementById('roleScreen').style.display='none';
-  currentRole = currentUserRole;
-  if(currentUserRole==='teacher'){
+  if(currentRole==='teacher'){
     document.getElementById('teacherApp').style.display='block';
     initTeacherApp();
   } else {
-    currentStudentName = name;
+    currentStudentName = currentUserName;
     document.getElementById('studentApp').style.display='block';
-    document.getElementById('studentNameChip').textContent = name+'同学';
+    document.getElementById('studentNameChip').textContent = currentUserName+'同学';
     initStudentApp();
   }
+}
+
+// ── Change Password Modal ──
+function showChangePasswordModal(){
+  document.getElementById('changePasswordModal').style.display = 'flex';
+  document.getElementById('newPassword').value = '';
+  document.getElementById('confirmPassword').value = '';
+  document.getElementById('changePwdError').style.display = 'none';
+  setTimeout(()=>document.getElementById('newPassword').focus(), 100);
+}
+
+async function handleChangePassword(){
+  const newPwd = document.getElementById('newPassword').value;
+  const confirmPwd = document.getElementById('confirmPassword').value;
+  const errEl = document.getElementById('changePwdError');
+
+  if(!newPwd || newPwd.length < 6){
+    errEl.textContent = '密码长度至少6位';
+    errEl.style.display = 'block';
+    return;
+  }
+  if(newPwd !== confirmPwd){
+    errEl.textContent = '两次输入的密码不一致';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Save password
+  const userKey = `${currentClassCode}_${currentRole}_${currentUserName}`;
+  localStorage.setItem('szpj_pwd_'+userKey, newPwd);
+
+  // Sync to cloud
+  if(cloudConnected && currentRole==='teacher'){
+    try{
+      await supabase.from('class_config')
+        .update({teacher_password: newPwd})
+        .eq('class_code', currentClassCode);
+      await supabase.from('users')
+        .update({password: newPwd})
+        .eq('class_code', currentClassCode)
+        .eq('role', 'teacher')
+        .eq('name', currentUserName);
+    }catch(e){ console.warn('[Cloud] 密码同步失败:', e); }
+  }
+
+  document.getElementById('changePasswordModal').style.display = 'none';
+  toast('密码修改成功');
+  enterApp();
 }
 
 function showLoginError(msg){
