@@ -2587,6 +2587,34 @@ function toast(msg){
 // ================================================================
 // INIT
 // ================================================================
+
+// Login self-check: verify all required elements and functions exist
+(function loginSelfCheck(){
+  try {
+    const checks = [
+      ['selectLoginRole', typeof selectLoginRole === 'function'],
+      ['handleLogin', typeof handleLogin === 'function'],
+      ['loginRoleTeacher', !!document.getElementById('loginRoleTeacher')],
+      ['loginRoleStudent', !!document.getElementById('loginRoleStudent')],
+      ['loginPasswordField', !!document.getElementById('loginPasswordField')],
+      ['loginPassword', !!document.getElementById('loginPassword')],
+      ['roleScreen', !!document.getElementById('roleScreen')],
+      ['Supabase SDK', typeof window.supabase !== 'undefined'],
+    ];
+    const failed = checks.filter(c => !c[1]);
+    if (failed.length > 0) {
+      const msg = '系统初始化检查发现问题: ' + failed.map(f => f[0]).join(', ');
+      console.error(msg);
+      const statusEl = document.getElementById('loginStatus');
+      if (statusEl) statusEl.textContent = msg;
+    } else {
+      console.log('[Login] All checks passed, ready to use');
+    }
+  } catch(e) {
+    console.error('[Login] Self-check error:', e);
+  }
+})();
+
 initSupabase();
 loadBooks();
 loadQBank();
