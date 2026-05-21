@@ -11,13 +11,13 @@
   ║  区域: 新加坡 (ap-southeast-1) | 计划: Free                 ║
   ║  数据库表: users, app_data, class_config                    ║
   ║  功能: RLS 行级安全 + Realtime 实时同步                      ║
-  ║  管理面板: https://db.com/dashboard/project/xauprfpcgrvzeeqnsepe ║
+  ║  管理面板: https://supabase.com/dashboard/project/xauprfpcgrvzeeqnsepe ║
   ╚══════════════════════════════════════════════════════════════╝
 -->
 <script>
 // ── Supabase 配置（已自动部署，项目：金华市外国语学校思政学习系统，区域：新加坡）──
 const SUPABASE_CONFIG = {
-  url: 'https://xauprfpcgrvzeeqnsepe.db.co',
+  url: 'https://xauprfpcgrvzeeqnsepe.supabase.co',
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhdXByZnBjZ3J2emVlcW5zZXBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDI5MjIsImV4cCI6MjA5NDgxODkyMn0.ck7VlPV7gFKcKCG6Vl7nmf3oxCX_8PmVtPC4wXqf6NE'
 };
 
@@ -480,12 +480,12 @@ nav{
         </div>
       </div>
     </div>
-    <div id="loginPasswordField" style="margin-bottom:16px;display:none">
-      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">管理密码</label>
-      <input id="loginPassword" type="password" placeholder="教师设置的管理密码"
+    <div id="loginPasswordField" style="margin-bottom:16px">
+      <label id="loginPasswordLabel" style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">管理密码</label>
+      <input id="loginPassword" type="password" placeholder="请输入密码"
         style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none"
         onkeydown="if(event.key==='Enter')handleLogin()">
-      <p style="font-size:11px;color:var(--gray-400);margin-top:4px">首次使用将自动创建班级，此密码即为班级管理密码</p>
+      <p id="loginPasswordHint" style="font-size:11px;color:var(--gray-400);margin-top:4px">首次使用将自动创建班级，此密码即为班级管理密码</p>
     </div>
     <button class="btn-primary" style="width:100%;padding:12px;font-size:14px;border-radius:var(--r-sm)" onclick="handleLogin()">进入系统</button>
     <div id="loginError" style="margin-top:10px;text-align:center;font-size:12px;color:var(--coral);display:none"></div>
@@ -507,6 +507,7 @@ nav{
       <button class="nav-tab" onclick="switchTeacherPage('t-class-report')">班级报告</button>
     </div>
     <div class="nav-right">
+      <select id="teacherClassSelector" style="padding:4px 8px;border:0.5px solid var(--gray-200);border-radius:6px;font-size:12px;color:var(--gray-700);background:var(--white);cursor:pointer" onchange="switchTeacherClass(this.value)"></select>
       <span class="chip chip-blue">教师端</span>
       <button class="btn-sm" onclick="backToRole()">切换角色</button>
     </div>
@@ -563,8 +564,7 @@ nav{
   <!-- T: STUDENTS -->
   <div class="page" id="t-students">
     <div class="section-header">
-      <div><div class="section-label">学生数据</div><div class="section-sub">管理班级学生，点击"查看报告"查看个人详情</div></div>
-      <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="openEditorModal('addStudentModal');document.getElementById('newStudentName').value='';setTimeout(()=>document.getElementById('newStudentName').focus(),100)">+ 添加学生</button>
+      <div><div class="section-label">学生数据</div><div class="section-sub">点击学生姓名查看详细报告</div></div>
     </div>
     <div class="card">
       <table class="student-table" id="studentTable">
@@ -864,75 +864,6 @@ nav{
   </div>
 </div>
 
-<!-- ===== ADD STUDENT MODAL ===== -->
-<div class="editor-modal-overlay" id="addStudentModal">
-  <div class="editor-modal sm">
-    <div class="modal-head">
-      <div class="modal-title">添加学生</div>
-      <button class="modal-close" onclick="closeEditorModal('addStudentModal')">✕</button>
-    </div>
-    <div class="editor-form-row">
-      <label>学生姓名</label>
-      <input class="editor-input" id="newStudentName" placeholder="请输入学生真实姓名"
-        onkeydown="if(event.key==='Enter')addStudent()">
-    </div>
-    <div id="addStudentError" style="font-size:12px;color:var(--coral);display:none;margin-bottom:8px"></div>
-    <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn-ghost" onclick="closeEditorModal('addStudentModal')">取消</button>
-      <button class="btn-primary" onclick="addStudent()">添加</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== STUDENT REPORT MODAL (Teacher View) ===== -->
-<div class="editor-modal-overlay" id="studentReportModal">
-  <div class="editor-modal lg" style="max-height:90vh;overflow-y:auto">
-    <div class="modal-head">
-      <div class="modal-title" id="teacherReportTitle">学生报告</div>
-      <button class="modal-close" onclick="closeEditorModal('studentReportModal')">✕</button>
-    </div>
-    <div class="grid-2" style="margin-bottom:16px">
-      <div class="card radar-section">
-        <div class="card-title">五大关键能力雷达图</div>
-        <div class="card-sub">基于高考评价体系的思政学科关键能力综合画像</div>
-        <div class="chart-wrap">
-          <canvas id="teacherRadarChart" role="img" aria-label="学生能力雷达图"></canvas>
-        </div>
-        <div class="radar-legend" id="teacherRadarLegend"></div>
-      </div>
-      <div>
-        <div class="card" style="margin-bottom:12px">
-          <div class="card-title">学科素养达成程度</div>
-          <div class="card-sub">政治认同 · 科学精神 · 法治意识 · 公共参与</div>
-          <div id="teacherCompetencyBars" style="margin-top:12px"></div>
-        </div>
-        <div class="card" style="margin-bottom:12px">
-          <div class="card-title">教材知识掌握</div>
-          <div class="card-sub">各书掌握率（基于课前/中/后综合）</div>
-          <div id="teacherBookMasteryBars" style="margin-top:12px"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">增值成长指数</div>
-          <div class="card-sub">与入学基线相比的成长幅度</div>
-          <div style="position:relative;height:150px">
-            <canvas id="teacherGrowthChart" role="img" aria-label="成长趋势折线图"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">学习轨迹时间线</div>
-      <div class="card-sub">记录每一次测评与成长节点</div>
-      <div id="teacherTimeline" style="margin-top:16px;max-height:280px;overflow-y:auto"></div>
-    </div>
-    <div class="card" style="margin-top:16px">
-      <div class="card-title">个人综合评语</div>
-      <div class="card-sub">基于全过程数据生成的深度学习画像</div>
-      <div id="teacherComment" style="margin-top:12px;font-size:13px;color:var(--gray-700);line-height:1.8"></div>
-    </div>
-  </div>
-</div>
-
 <script>
 // ================================================================
 // SUPABASE CLOUD SYNC MODULE
@@ -954,16 +885,9 @@ function initSupabase(){
       console.log('[Cloud] 未配置 Supabase，使用本地模式');
       return;
     }
-    db = window.db.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+    db = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
     cloudConnected = true;
     console.log('[Cloud] Supabase 客户端初始化成功');
-    // Restore last login
-    const last = JSON.parse(localStorage.getItem('szpj_lastlogin')||'null');
-    if(last){
-      document.getElementById('loginClassCode').value = last.classCode||'';
-      document.getElementById('loginName').value = last.name||'';
-      if(last.role) selectLoginRole(last.role);
-    }
   }catch(e){
     console.warn('[Cloud] Supabase 初始化失败:', e);
   }
@@ -974,7 +898,19 @@ function selectLoginRole(role){
   currentUserRole = role;
   document.getElementById('loginRoleTeacher').classList.toggle('selected', role==='teacher');
   document.getElementById('loginRoleStudent').classList.toggle('selected', role==='student');
-  document.getElementById('loginPasswordField').style.display = role==='teacher'?'block':'none';
+  // 始终显示密码区，根据角色切换标签文案
+  var pwLabel = document.getElementById('loginPasswordLabel');
+  var pwHint = document.getElementById('loginPasswordHint');
+  var pwInput = document.getElementById('loginPassword');
+  if(role==='teacher'){
+    pwLabel.textContent = '管理密码';
+    pwInput.placeholder = '教师设置的管理密码';
+    pwHint.textContent = '首次使用将自动创建班级，此密码即为班级管理密码';
+  } else {
+    pwLabel.textContent = '登录密码';
+    pwInput.placeholder = '请输入密码（首次登录即设置）';
+    pwHint.textContent = '首次登录请设置个人密码，后续登录凭此密码进入';
+  }
 }
 
 // ── Login handler ──
@@ -1001,7 +937,7 @@ async function handleLogin(){
     try{
       if(currentUserRole==='teacher'){
         // Check if class exists
-        const {data: cls, error} = await supabase
+        const {data: cls, error} = await db
           .from('class_config')
           .select('*')
           .eq('class_code', classCode)
@@ -1026,11 +962,30 @@ async function handleLogin(){
           await cloudWrite('qbank', DEFAULT_QBANK);
         }
       }
+      if(currentUserRole==='student'){
+        // 学生端密码验证
+        if(!password){ showLoginError('请输入登录密码（首次登录即设置）'); setStatus(''); return; }
+        const {data: stuUsers, error: stuErr} = await db
+          .from('users')
+          .select('password')
+          .eq('class_code', classCode)
+          .eq('name', name)
+          .eq('role', 'student')
+          .order('created_at', {ascending:false})
+          .limit(1);
+        if(!stuErr && stuUsers && stuUsers.length>0){
+          // 老学生：验证密码
+          if(stuUsers[0].password !== password){
+            showLoginError('密码错误'); setStatus(''); return;
+          }
+        }
+        // 新学生：密码已输入，下面 upsert 时自动存入
+      }
 
       // Register/login user
       await db.from('users').upsert({
         name, role:currentUserRole, class_code:classCode,
-        password:currentUserRole==='teacher'?password:null
+        password: password || null
       }, {onConflict:'id'});
 
       // Load cloud data
@@ -1040,10 +995,23 @@ async function handleLogin(){
       setStatus('✓ 云端已连接');
       setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
     }catch(e){
-      console.warn('[Cloud] 登录同步失败，使用本地数据:', e);
-      setStatus('⚠ 云端连接失败，使用本地数据');
+      console.error('[Cloud] 登录验证失败:', e);
+      // 教师端必须通过云端验证密码，不能放行
+      if(currentUserRole==='teacher'){
+        showLoginError('网络连接失败，无法验证身份，请检查网络后重试');
+        setStatus('');
+        return;
+      }
+      // 学生端允许离线登录（输入班级码+姓名即可）
+      console.warn('[Cloud] 学生端离线登录');
     }
   } else {
+    // 云端未连接
+    if(currentUserRole==='teacher'){
+      showLoginError('云端未连接，教师端无法登录');
+      setStatus('');
+      return;
+    }
     setStatus('本地模式（未配置云端）');
   }
 
@@ -1125,7 +1093,7 @@ async function loadCloudData(){
 function startRealtime(){
   if(!cloudConnected||!currentClassCode||realtimeChannel) return;
   try{
-    realtimeChannel = supabase
+    realtimeChannel = db
       .channel('class-'+currentClassCode)
       .on('postgres_changes',
         {event:'*', schema:'public', table:'app_data', filter:'class_code=eq.'+currentClassCode},
@@ -1561,7 +1529,47 @@ function backToRole(){
 // TEACHER APP
 // ================================================================
 function initTeacherApp(){
+  loadTeacherClasses();
   loadData();
+  renderTeacherBookTabs();
+  renderTeacherChapters(0);
+  renderStudentTable();
+  renderClassReport();
+  renderTeacherOverview();
+  switchTeacherPage('t-overview');
+}
+// 加载教师管理的所有班级到下拉框
+async function loadTeacherClasses(){
+  const sel = document.getElementById('teacherClassSelector');
+  if(!sel || !db) return;
+  try{
+    const {data: classes} = await db.from('class_config').select('class_code');
+    sel.innerHTML = '';
+    const codes = classes ? [...new Set(classes.map(c=>c.class_code))] : [];
+    if(codes.length===0 || !codes.includes(currentClassCode)){
+      codes.push(currentClassCode);
+    }
+    codes.forEach(code => {
+      sel.innerHTML += `<option value="${code}" ${code===currentClassCode?'selected':''}>${code}</option>`;
+    });
+  }catch(e){
+    sel.innerHTML = `<option>${currentClassCode}</option>`;
+  }
+}
+// 切换班级
+async function switchTeacherClass(code){
+  if(code===currentClassCode) return;
+  currentClassCode = code;
+  // 更新 localStorage
+  const last = JSON.parse(localStorage.getItem('szpj_lastlogin')||'{}');
+  last.classCode = code;
+  localStorage.setItem('szpj_lastlogin', JSON.stringify(last));
+  // 断开旧班级实时通道
+  if(realtimeChannel){ db.removeChannel(realtimeChannel); realtimeChannel = null; }
+  // 清空旧数据缓存，重新加载
+  studentData = {};
+  await loadCloudData();
+  startRealtime();
   renderTeacherBookTabs();
   renderTeacherChapters(0);
   renderStudentTable();
@@ -1658,37 +1666,12 @@ function renderStudentTable(){
       <td><span class="score-pill ${scoreClass(avg(after))}">${avg(after)}分</span></td>
       <td><span class="score-pill ${scoreClass(avgAbilityRound)}">${avgAbilityRound}分</span></td>
       <td style="color:var(--green)">+${growth}%</td>
-      <td style="white-space:nowrap">
-        <button class="btn-sm" onclick="viewStudentDetail('${n}')">查看报告</button>
-        <button class="btn-sm" style="color:var(--coral)" onclick="deleteStudent('${n}')">删除</button>
-      </td>
+      <td><button class="btn-sm" onclick="viewStudentDetail('${n}')">查看报告</button></td>
     </tr>`;
   }).join('');
 }
-function addStudent(){
-  const name=document.getElementById('newStudentName').value.trim();
-  const errEl=document.getElementById('addStudentError');
-  if(!name){errEl.textContent='请输入学生姓名';errEl.style.display='block';return;}
-  if(studentData[name]){errEl.textContent='该学生已存在';errEl.style.display='block';return;}
-  errEl.style.display='none';
-  getStudent(name);
-  saveData();
-  closeEditorModal('addStudentModal');
-  renderStudentTable();
-  toast('已添加学生：'+name);
-}
-function deleteStudent(name){
-  if(!confirm('确定要删除学生"'+name+'"的所有数据吗？此操作不可恢复。'))return;
-  delete studentData[name];
-  saveData();
-  renderStudentTable();
-  renderTeacherOverview();
-  toast('已删除学生：'+name);
-}
 function viewStudentDetail(name){
-  document.getElementById('teacherReportTitle').textContent=name+' 的学习成长报告';
-  openEditorModal('studentReportModal');
-  setTimeout(()=>renderTeacherStudentReport(name),100);
+  toast('切换到学生端查看 '+name+' 的详细报告');
 }
 function renderTeacherOverview(){
   // Heatmap
@@ -2646,103 +2629,6 @@ function renderStudentReport(){
     </div>`;
   }
 }
-
-// ================================================================
-// TEACHER VIEW: Student Report
-// ================================================================
-function renderTeacherStudentReport(name){
-  const s=getStudent(name);
-
-  // Radar chart
-  const rc=document.getElementById('teacherRadarChart');
-  if(rc){
-    if(rc._chart){rc._chart.destroy();}
-    rc._chart=new Chart(rc,{
-      type:'radar',
-      data:{
-        labels:ABILITIES.map(a=>a.name),
-        datasets:[
-          {label:'当前水平',data:ABILITIES.map(a=>s.abilities[a.key]||40),
-           borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.18)',borderWidth:2,pointBackgroundColor:'#185FA5',pointRadius:4},
-          {label:'入学基线',data:ABILITIES.map(a=>s.baseline[a.key]||38),
-           borderColor:'#D3D1C7',backgroundColor:'rgba(0,0,0,.03)',borderWidth:1.5,pointBackgroundColor:'#D3D1C7',pointRadius:3},
-        ]
-      },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false}},
-        scales:{r:{min:0,max:100,ticks:{display:false,stepSize:20},grid:{color:'rgba(0,0,0,.06)'},
-          pointLabels:{font:{size:11},color:'#444441'}}}
-      }
-    });
-  }
-
-  // Radar legend
-  document.getElementById('teacherRadarLegend').innerHTML=
-    '<div class="radar-legend-item"><div class="legend-swatch" style="background:#185FA5"></div>当前水平</div>'+
-    '<div class="radar-legend-item"><div class="legend-swatch" style="background:#D3D1C7"></div>入学基线</div>';
-
-  // Competency bars
-  const cb=document.getElementById('teacherCompetencyBars');
-  if(cb) cb.innerHTML=COMPETENCIES.map(c=>{
-    const v=s.competencies?.[c.key]||40;
-    const bv=s.competencyBaseline?.[c.key]||38;
-    return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:'+c.color+';font-weight:500">'+c.name+'</span><span style="color:var(--gray-400)">'+v+'分 <span style="font-size:11px;color:var(--green)">+'+(v-bv)+'</span></span></div><div style="height:6px;background:var(--gray-100);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+v+'%;background:'+c.color+';border-radius:3px;transition:width .8s"></div></div></div>';
-  }).join('');
-
-  // Book mastery bars
-  const bm=document.getElementById('teacherBookMasteryBars');
-  if(bm) bm.innerHTML=BOOKS.map(b=>{
-    const v=s.bookMastery[b.id]||0;
-    return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:'+b.color+';font-weight:500">'+b.name+' '+b.fullName+'</span><span style="color:var(--gray-400)">'+(v?v+'%':'未开始')+'</span></div><div style="height:6px;background:var(--gray-100);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+v+'%;background:'+b.color+';border-radius:3px;transition:width .8s"></div></div></div>';
-  }).join('');
-
-  // Growth line chart
-  const gc=document.getElementById('teacherGrowthChart');
-  if(gc){
-    if(gc._chart){gc._chart.destroy();}
-    const timeline=s.timeline?.slice().reverse()??[];
-    const pts=timeline.slice(-6).map(t=>t.score);
-    while(pts.length<6) pts.unshift(50);
-    gc._chart=new Chart(gc,{
-      type:'line',
-      data:{
-        labels:['','','','','','本次'],
-        datasets:[{data:pts,borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.1)',
-          fill:true,tension:.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#185FA5'}]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{y:{min:30,max:100,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}}
-    });
-  }
-
-  // Timeline
-  const tl=document.getElementById('teacherTimeline');
-  const events=s.timeline||[];
-  if(tl){
-    if(!events.length){
-      tl.innerHTML='<p style="font-size:12px;color:var(--gray-400);text-align:center;padding:20px">暂无学习记录</p>';
-    } else {
-      tl.innerHTML='<div class="timeline">'+events.map((e,i)=>'<div class="timeline-item"><div class="timeline-left"><div class="timeline-dot done" style="border-color:'+(e.phase==='before'?'#BA7517':e.phase==='during'?'#185FA5':'#534AB7')+';background:'+(e.phase==='before'?'#BA7517':e.phase==='during'?'#185FA5':'#534AB7')+'"></div>'+(i<events.length-1?'<div class="timeline-line"></div>':'')+'</div><div class="timeline-content"><div class="timeline-time">'+e.time+'</div><div class="timeline-text">'+e.text+'</div></div></div>').join('')+'</div>';
-    }
-  }
-
-  // Comment
-  const cm=document.getElementById('teacherComment');
-  if(cm){
-    const avgAb=Math.round(ABILITIES.reduce((sum,a)=>sum+(s.abilities?.[a.key]||40),0)/ABILITIES.length);
-    const topAb=ABILITIES.reduce((best,a)=>(s.abilities?.[a.key]||0)>(s.abilities?.[best.key]||0)?a:best,ABILITIES[0]);
-    const weakAb=ABILITIES.reduce((w,a)=>(s.abilities?.[a.key]||100)<(s.abilities?.[w.key]||100)?a:best,ABILITIES[0]);
-    const completedCount=Object.keys(s.scores||{}).length;
-    cm.innerHTML=
-      '<p><strong>'+name+'</strong>同学在高中思想政治学科学习中表现'+(avgAb>=75?'优秀':avgAb>=60?'良好':'需要加强')+'。'+
-      '五大关键能力综合得分 <strong>'+avgAb+'分</strong>，其中<strong>'+topAb.name+'</strong>表现最为突出。'+
-      '已完成 <strong>'+completedCount+'</strong> 次测评。'+
-      (avgAb>=70?'建议继续保持良好学习状态，进一步深化核心知识理解。':'建议加强基础知识的巩固，积极参与课堂互动与讨论。')+
-      '</p>';
-  }
-}
-
 function exportStudentReport(){
   const s=getStudent(currentStudentName);
   const report={
@@ -2779,34 +2665,15 @@ function toast(msg){
 // ================================================================
 // INIT
 // ================================================================
-
-// Login self-check: verify all required elements and functions exist
-(function loginSelfCheck(){
-  try {
-    const checks = [
-      ['selectLoginRole', typeof selectLoginRole === 'function'],
-      ['handleLogin', typeof handleLogin === 'function'],
-      ['loginRoleTeacher', !!document.getElementById('loginRoleTeacher')],
-      ['loginRoleStudent', !!document.getElementById('loginRoleStudent')],
-      ['loginPasswordField', !!document.getElementById('loginPasswordField')],
-      ['loginPassword', !!document.getElementById('loginPassword')],
-      ['roleScreen', !!document.getElementById('roleScreen')],
-      ['Supabase SDK', typeof window.supabase !== 'undefined'],
-    ];
-    const failed = checks.filter(c => !c[1]);
-    if (failed.length > 0) {
-      const msg = '系统初始化检查发现问题: ' + failed.map(f => f[0]).join(', ');
-      console.error(msg);
-      const statusEl = document.getElementById('loginStatus');
-      if (statusEl) statusEl.textContent = msg;
-    } else {
-      console.log('[Login] All checks passed, ready to use');
-    }
-  } catch(e) {
-    console.error('[Login] Self-check error:', e);
+// Restore last login（始终执行，不依赖 Supabase）
+(function restoreLastLogin(){
+  const last = JSON.parse(localStorage.getItem('szpj_lastlogin')||'null');
+  if(last){
+    document.getElementById('loginClassCode').value = last.classCode||'';
+    document.getElementById('loginName').value = last.name||'';
+    if(last.role) selectLoginRole(last.role);
   }
 })();
-
 initSupabase();
 loadBooks();
 loadQBank();
