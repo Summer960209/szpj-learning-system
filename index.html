@@ -3,38 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>金华市外国语学校高中思想政治学科学习系统</title>
+<title>閲戝崕甯傚鍥借瀛︽牎楂樹腑鎬濇兂鏀挎不瀛︾瀛︿範绯荤粺</title>
 <!--
-  ╔══════════════════════════════════════════════════════════════╗
-  ║  云端配置（已完成）：                                        ║
-  ║  Supabase 项目: 金华市外国语学校思政学习系统                   ║
-  ║  区域: 新加坡 (ap-southeast-1) | 计划: Free                 ║
-  ║  数据库表: users, app_data, class_config                    ║
-  ║  功能: RLS 行级安全 + Realtime 实时同步                      ║
-  ║  管理面板: https://supabase.com/dashboard/project/xauprfpcgrvzeeqnsepe ║
-  ╚══════════════════════════════════════════════════════════════╝
+  鈺斺晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晽
+  鈺? 浜戠閰嶇疆锛堝凡瀹屾垚锛夛細                                        鈺?  鈺? Supabase 椤圭洰: 閲戝崕甯傚鍥借瀛︽牎鎬濇斂瀛︿範绯荤粺                   鈺?  鈺? 鍖哄煙: 鏂板姞鍧?(ap-southeast-1) | 璁″垝: Free                 鈺?  鈺? 鏁版嵁搴撹〃: users, app_data, class_config                    鈺?  鈺? 鍔熻兘: RLS 琛岀骇瀹夊叏 + Realtime 瀹炴椂鍚屾                      鈺?  鈺? 绠＄悊闈㈡澘: https://supabase.com/dashboard/project/xauprfpcgrvzeeqnsepe 鈺?  鈺氣晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨暆
 -->
 <script>
-// ── Supabase 配置（已自动部署，项目：金华市外国语学校思政学习系统，区域：新加坡）──
+// 鈹€鈹€ Supabase 閰嶇疆锛堝凡鑷姩閮ㄧ讲锛岄」鐩細閲戝崕甯傚鍥借瀛︽牎鎬濇斂瀛︿範绯荤粺锛屽尯鍩燂細鏂板姞鍧★級鈹€鈹€
 const SUPABASE_CONFIG = {
   url: 'https://xauprfpcgrvzeeqnsepe.supabase.co',
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhdXByZnBjZ3J2emVlcW5zZXBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDI5MjIsImV4cCI6MjA5NDgxODkyMn0.ck7VlPV7gFKcKCG6Vl7nmf3oxCX_8PmVtPC4wXqf6NE'
 };
 
-// ── 建表 SQL（在 Supabase Dashboard → SQL Editor 中执行）──
+// 鈹€鈹€ 寤鸿〃 SQL锛堝湪 Supabase Dashboard 鈫?SQL Editor 涓墽琛岋級鈹€鈹€
 const SETUP_SQL = `
--- 用户表
-CREATE TABLE IF NOT EXISTS users (
+-- 鐢ㄦ埛琛?CREATE TABLE IF NOT EXISTS users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('teacher','student')),
+  role TEXT NOT NULL CHECK (role IN ('teacher','student','admin')),
   password TEXT,
   class_code TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 应用数据表
-CREATE TABLE IF NOT EXISTS app_data (
+-- 搴旂敤鏁版嵁琛?CREATE TABLE IF NOT EXISTS app_data (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   class_code TEXT NOT NULL,
   key TEXT NOT NULL,
@@ -43,8 +35,7 @@ CREATE TABLE IF NOT EXISTS app_data (
   UNIQUE(class_code, key)
 );
 
--- 班级配置表
-CREATE TABLE IF NOT EXISTS class_config (
+-- 鐝骇閰嶇疆琛?CREATE TABLE IF NOT EXISTS class_config (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   class_code TEXT UNIQUE NOT NULL,
   teacher_name TEXT NOT NULL,
@@ -52,23 +43,23 @@ CREATE TABLE IF NOT EXISTS class_config (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 开启 RLS（行级安全策略）
+-- 寮€鍚?RLS锛堣绾у畨鍏ㄧ瓥鐣ワ級
 ALTER TABLE app_data ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
--- 允许匿名读取（按班级码过滤）
+-- 鍏佽鍖垮悕璇诲彇锛堟寜鐝骇鐮佽繃婊わ級
 CREATE POLICY "Allow anon read by class" ON app_data
   FOR SELECT USING (true);
 
--- 允许匿名插入
+-- 鍏佽鍖垮悕鎻掑叆
 CREATE POLICY "Allow anon insert" ON app_data
   FOR INSERT WITH CHECK (true);
 
--- 允许匿名更新
+-- 鍏佽鍖垮悕鏇存柊
 CREATE POLICY "Allow anon update" ON app_data
   FOR UPDATE USING (true);
 
--- 允许匿名删除
+-- 鍏佽鍖垮悕鍒犻櫎
 CREATE POLICY "Allow anon delete" ON app_data
   FOR DELETE USING (true);
 
@@ -78,7 +69,7 @@ CREATE POLICY "Allow anon users" ON users
 CREATE POLICY "Allow anon class" ON class_config
   FOR ALL USING (true);
 
--- 启用 Realtime
+-- 鍚敤 Realtime
 ALTER PUBLICATION supabase_realtime ADD TABLE app_data;
 `;
 </script>
@@ -451,43 +442,47 @@ nav{
 <!-- ===== LOGIN SCREEN ===== -->
 <div class="role-screen" id="roleScreen">
   <div style="text-align:center">
-    <div style="font-size:28px;margin-bottom:8px">金华市外国语学校</div>
-    <h1>高中思想政治学科学习系统</h1>
-    <p style="margin-top:8px">基于AI增强评估理论 · 全过程学习评价 · 增值性成长追踪</p>
+    <div style="font-size:28px;margin-bottom:8px">閲戝崕甯傚鍥借瀛︽牎</div>
+    <h1>楂樹腑鎬濇兂鏀挎不瀛︾瀛︿範绯荤粺</h1>
+    <p style="margin-top:8px">鍩轰簬AI澧炲己璇勪及鐞嗚 路 鍏ㄨ繃绋嬪涔犺瘎浠?路 澧炲€兼€ф垚闀胯拷韪?/p>
   </div>
   <div style="width:360px;max-width:90vw">
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">班级码</label>
-      <input id="loginClassCode" type="text" placeholder="例如：SZPJ2026A" 
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">鐝骇鐮?/label>
+      <input id="loginClassCode" type="text" placeholder="渚嬪锛歋ZPJ2026A" 
         style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none;text-transform:uppercase">
     </div>
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">你的姓名</label>
-      <input id="loginName" type="text" placeholder="请输入真实姓名"
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">浣犵殑濮撳悕</label>
+      <input id="loginName" type="text" placeholder="璇疯緭鍏ョ湡瀹炲鍚?
         style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none"
         onkeydown="if(event.key==='Enter')document.getElementById('loginPassword').focus()">
     </div>
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">登录身份</label>
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">鐧诲綍韬唤</label>
       <div style="display:flex;gap:10px">
         <div class="role-card" id="loginRoleTeacher" onclick="selectLoginRole('teacher')" style="flex:1;padding:16px">
-          <div class="icon">👩‍🏫</div>
-          <h2>教师端</h2>
+          <div class="icon">馃懇鈥嶐煆?/div>
+          <h2>鏁欏笀绔?/h2>
+        </div>
+        <div class="role-card" id="loginRoleAdmin" onclick="selectLoginRole('admin')" style="flex:1;padding:16px">
+          <div class="icon">馃敡</div>
+          <h2>绠＄悊鍛?/h2>
         </div>
         <div class="role-card" id="loginRoleStudent" onclick="selectLoginRole('student')" style="flex:1;padding:16px">
-          <div class="icon">📚</div>
-          <h2>学生端</h2>
+          <div class="icon">馃摎</div>
+          <h2>瀛︾敓绔?/h2>
         </div>
       </div>
     </div>
     <div id="loginPasswordField" style="margin-bottom:16px">
-      <label id="loginPasswordLabel" style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">管理密码</label>
-      <input id="loginPassword" type="password" placeholder="请输入密码"
+      <label id="loginPasswordLabel" style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">绠＄悊瀵嗙爜</label>
+      <input id="loginPassword" type="password" placeholder="璇疯緭鍏ュ瘑鐮?
         style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none"
         onkeydown="if(event.key==='Enter')handleLogin()">
-      <p id="loginPasswordHint" style="font-size:11px;color:var(--gray-400);margin-top:4px">首次使用将自动创建班级，此密码即为班级管理密码</p>
+      <p id="loginPasswordHint" style="font-size:11px;color:var(--gray-400);margin-top:4px">棣栨浣跨敤灏嗚嚜鍔ㄥ垱寤虹彮绾э紝姝ゅ瘑鐮佸嵆涓虹彮绾х鐞嗗瘑鐮?/p>
     </div>
-    <button class="btn-primary" style="width:100%;padding:12px;font-size:14px;border-radius:var(--r-sm)" onclick="handleLogin()">进入系统</button>
+    <button class="btn-primary" style="width:100%;padding:12px;font-size:14px;border-radius:var(--r-sm)" onclick="handleLogin()">杩涘叆绯荤粺</button>
     <div id="loginError" style="margin-top:10px;text-align:center;font-size:12px;color:var(--coral);display:none"></div>
     <div id="loginStatus" style="margin-top:10px;text-align:center;font-size:11px;color:var(--gray-400)"></div>
   </div>
@@ -497,52 +492,53 @@ nav{
 <div id="teacherApp" style="display:none">
   <nav>
     <div class="nav-brand">
-      <div class="nav-logo">政</div>
-      金华外国语高中思政学习系统
+      <div class="nav-logo">鏀?/div>
+      閲戝崕澶栧浗璇珮涓€濇斂瀛︿範绯荤粺
     </div>
     <div class="nav-tabs">
-      <button class="nav-tab active" onclick="switchTeacherPage('t-overview')">总览</button>
-      <button class="nav-tab" onclick="switchTeacherPage('t-curriculum')">课程管理</button>
-      <button class="nav-tab" onclick="switchTeacherPage('t-students')">学生数据</button>
-      <button class="nav-tab" onclick="switchTeacherPage('t-class-report')">班级报告</button>
+      <button class="nav-tab active" onclick="switchTeacherPage('t-overview')">鎬昏</button>
+      <button class="nav-tab" onclick="switchTeacherPage('t-curriculum')">璇剧▼绠＄悊</button>
+      <button class="nav-tab" onclick="switchTeacherPage('t-students')">瀛︾敓鏁版嵁</button>
+      <button class="nav-tab" onclick="switchTeacherPage('t-class-report')">鐝骇鎶ュ憡</button>
     </div>
     <div class="nav-right">
       <select id="teacherClassSelector" style="padding:4px 8px;border:0.5px solid var(--gray-200);border-radius:6px;font-size:12px;color:var(--gray-700);background:var(--white);cursor:pointer" onchange="switchTeacherClass(this.value)"></select>
-      <span class="chip chip-blue">教师端</span>
-      <button class="btn-sm" onclick="backToRole()">切换角色</button>
+      <button class="btn-sm" onclick="openChangePwdModal()">淇敼瀵嗙爜</button>
+      <span class="chip chip-blue">鏁欏笀绔?/span>
+      <button class="btn-sm" onclick="backToRole()">鍒囨崲瑙掕壊</button>
     </div>
   </nav>
 
   <!-- T: OVERVIEW -->
   <div class="page active" id="t-overview">
     <div class="section-header">
-      <div><div class="section-label">教学总览</div><div class="section-sub">本学期评价数据汇总</div></div>
-      <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="exportData()">导出数据 JSON</button>
+      <div><div class="section-label">鏁欏鎬昏</div><div class="section-sub">鏈鏈熻瘎浠锋暟鎹眹鎬?/div></div>
+      <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="exportData()">瀵煎嚭鏁版嵁 JSON</button>
     </div>
     <div class="grid-4" style="margin-bottom:20px">
-      <div class="metric"><div class="metric-num" style="color:var(--blue)" id="t-total-students">32</div><div class="metric-label">班级人数</div></div>
-      <div class="metric"><div class="metric-num" style="color:var(--green)" id="t-submitted">28</div><div class="metric-label">本周已提交</div></div>
-      <div class="metric"><div class="metric-num" style="color:var(--amber)" id="t-avg-score">78.4</div><div class="metric-label">全班平均分</div></div>
-      <div class="metric"><div class="metric-num" style="color:var(--purple)" id="t-tasks-done">12</div><div class="metric-label">已完成任务</div></div>
+      <div class="metric"><div class="metric-num" style="color:var(--blue)" id="t-total-students">32</div><div class="metric-label">鐝骇浜烘暟</div></div>
+      <div class="metric"><div class="metric-num" style="color:var(--green)" id="t-submitted">28</div><div class="metric-label">鏈懆宸叉彁浜?/div></div>
+      <div class="metric"><div class="metric-num" style="color:var(--amber)" id="t-avg-score">78.4</div><div class="metric-label">鍏ㄧ彮骞冲潎鍒?/div></div>
+      <div class="metric"><div class="metric-num" style="color:var(--purple)" id="t-tasks-done">12</div><div class="metric-label">宸插畬鎴愪换鍔?/div></div>
     </div>
     <div class="grid-2">
       <div class="card">
-        <div class="card-title">各维度班级掌握情况</div>
-        <div class="card-sub">五大关键能力平均得分分布</div>
+        <div class="card-title">鍚勭淮搴︾彮绾ф帉鎻℃儏鍐?/div>
+        <div class="card-sub">浜斿ぇ鍏抽敭鑳藉姏骞冲潎寰楀垎鍒嗗竷</div>
         <div style="position:relative;height:280px">
-          <canvas id="classRadarChart" role="img" aria-label="班级能力雷达图">班级能力分布图</canvas>
+          <canvas id="classRadarChart" role="img" aria-label="鐝骇鑳藉姏闆疯揪鍥?>鐝骇鑳藉姏鍒嗗竷鍥?/canvas>
         </div>
       </div>
       <div class="card">
-        <div class="card-title">需重点关注学生</div>
-        <div class="card-sub">近期得分偏低或进步明显</div>
+        <div class="card-title">闇€閲嶇偣鍏虫敞瀛︾敓</div>
+        <div class="card-sub">杩戞湡寰楀垎鍋忎綆鎴栬繘姝ユ槑鏄?/div>
         <div id="focusStudentList" style="margin-top:4px"></div>
       </div>
     </div>
 
     <div class="card" style="margin-top:16px">
-      <div class="card-title">7本教材知识掌握热力图</div>
-      <div class="card-sub">全班各教材平均掌握率（颜色越深越好）</div>
+      <div class="card-title">7鏈暀鏉愮煡璇嗘帉鎻＄儹鍔涘浘</div>
+      <div class="card-sub">鍏ㄧ彮鍚勬暀鏉愬钩鍧囨帉鎻＄巼锛堥鑹茶秺娣辫秺濂斤級</div>
       <div id="heatmapGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:12px"></div>
     </div>
   </div>
@@ -550,13 +546,13 @@ nav{
   <!-- T: CURRICULUM -->
   <div class="page" id="t-curriculum">
     <div class="section-header">
-      <div><div class="section-label">课程管理</div><div class="section-sub">按教材章节管理评价任务与题目</div></div>
-      <button class="btn-editor" onclick="openAddBook()">＋ 新增教材</button>
+      <div><div class="section-label">璇剧▼绠＄悊</div><div class="section-sub">鎸夋暀鏉愮珷鑺傜鐞嗚瘎浠蜂换鍔′笌棰樼洰</div></div>
+      <button class="btn-editor" onclick="openAddBook()">锛?鏂板鏁欐潗</button>
     </div>
     <div class="book-tabs" id="teacherBookTabs"></div>
     <div class="curriculum-actions" id="curriculumActions">
-      <button class="btn-editor" onclick="openAddChapter()">＋ 新增章节</button>
-      <button class="btn-editor-red" id="btnDeleteBook" onclick="deleteCurrentBook()">🗑 删除当前教材</button>
+      <button class="btn-editor" onclick="openAddChapter()">锛?鏂板绔犺妭</button>
+      <button class="btn-editor-red" id="btnDeleteBook" onclick="deleteCurrentBook()">馃棏 鍒犻櫎褰撳墠鏁欐潗</button>
     </div>
     <div id="teacherChapters"></div>
   </div>
@@ -564,14 +560,14 @@ nav{
   <!-- T: STUDENTS -->
   <div class="page" id="t-students">
     <div class="section-header">
-      <div><div class="section-label">学生数据</div><div class="section-sub">点击学生姓名查看详细报告</div></div>
+      <div><div class="section-label">瀛︾敓鏁版嵁</div><div class="section-sub">鐐瑰嚮瀛︾敓濮撳悕鏌ョ湅璇︾粏鎶ュ憡</div></div>
     </div>
     <div class="card">
       <table class="student-table" id="studentTable">
         <thead>
           <tr>
-            <th>姓名</th><th>课前平均</th><th>课中平均</th><th>课后平均</th>
-            <th>关键能力均分</th><th>增值指数</th><th>操作</th>
+            <th>濮撳悕</th><th>璇惧墠骞冲潎</th><th>璇句腑骞冲潎</th><th>璇惧悗骞冲潎</th>
+            <th>鍏抽敭鑳藉姏鍧囧垎</th><th>澧炲€兼寚鏁?/th><th>鎿嶄綔</th>
           </tr>
         </thead>
         <tbody id="studentTableBody"></tbody>
@@ -582,28 +578,101 @@ nav{
   <!-- T: CLASS REPORT -->
   <div class="page" id="t-class-report">
     <div class="section-header">
-      <div><div class="section-label">班级综合报告</div><div class="section-sub">公共参与学科素养增值分析</div></div>
+      <div><div class="section-label">鐝骇缁煎悎鎶ュ憡</div><div class="section-sub">鍏叡鍙備笌瀛︾绱犲吇澧炲€煎垎鏋?/div></div>
     </div>
     <div class="grid-2">
       <div class="card">
-        <div class="card-title">能力增值对比</div>
-        <div class="card-sub">期初→期末各关键能力变化</div>
+        <div class="card-title">鑳藉姏澧炲€煎姣?/div>
+        <div class="card-sub">鏈熷垵鈫掓湡鏈悇鍏抽敭鑳藉姏鍙樺寲</div>
         <div style="position:relative;height:300px">
-          <canvas id="growthChart" role="img" aria-label="能力增值对比柱状图">能力增值图</canvas>
+          <canvas id="growthChart" role="img" aria-label="鑳藉姏澧炲€煎姣旀煴鐘跺浘">鑳藉姏澧炲€煎浘</canvas>
         </div>
       </div>
       <div class="card">
-        <div class="card-title">学科素养达成程度</div>
-        <div class="card-sub">按核心素养水平分层统计</div>
+        <div class="card-title">瀛︾绱犲吇杈炬垚绋嬪害</div>
+        <div class="card-sub">鎸夋牳蹇冪礌鍏绘按骞冲垎灞傜粺璁?/div>
         <div style="position:relative;height:300px">
-          <canvas id="tierChart" role="img" aria-label="素养分层饼图">分层图</canvas>
+          <canvas id="tierChart" role="img" aria-label="绱犲吇鍒嗗眰楗煎浘">鍒嗗眰鍥?/canvas>
         </div>
       </div>
     </div>
     <div class="card" style="margin-top:16px">
-      <div class="card-title">教学建议</div>
-      <div class="card-sub">基于全班评价数据的AI生成教学策略</div>
+      <div class="card-title">鏁欏寤鸿</div>
+      <div class="card-sub">鍩轰簬鍏ㄧ彮璇勪环鏁版嵁鐨凙I鐢熸垚鏁欏绛栫暐</div>
       <div id="teachingAdvice" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN APP ===== -->
+<div id="adminApp" style="display:none">
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-logo">鏀?/div>
+      閲戝崕澶栧浗璇珮涓€濇斂瀛︿範绯荤粺
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchAdminPage('a-teachers')">鏁欏笀绠＄悊</button>
+      <button class="nav-tab" onclick="switchAdminPage('a-students')">瀛︾敓绠＄悊</button>
+      <button class="nav-tab" onclick="switchAdminPage('a-password')">淇敼瀵嗙爜</button>
+    </div>
+    <div class="nav-right">
+      <span class="chip" style="background:var(--purple-l);color:var(--purple)">绠＄悊鍛?/span>
+      <button class="btn-sm" onclick="backToRole()">閫€鍑?/button>
+    </div>
+  </nav>
+
+  <!-- A: 鏁欏笀绠＄悊 -->
+  <div class="page active" id="a-teachers">
+    <div class="section-header">
+      <div><div class="section-label">鏁欏笀璐﹀彿绠＄悊</div><div class="section-sub">绠＄悊鎵€鏈夌彮绾х殑鏁欏笀璐﹀彿涓庡瘑鐮?/div></div>
+      <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="openAdminTeacherModal('add')">锛?鏂板鏁欏笀</button>
+    </div>
+    <div class="card">
+      <table class="student-table" id="adminTeacherTable">
+        <thead>
+          <tr><th>鐝骇鐮?/th><th>鏁欏笀濮撳悕</th><th>鍒涘缓鏃堕棿</th><th>鎿嶄綔</th></tr>
+        </thead>
+        <tbody id="adminTeacherBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- A: 瀛︾敓绠＄悊 -->
+  <div class="page" id="a-students">
+    <div class="section-header">
+      <div><div class="section-label">瀛︾敓璐﹀彿绠＄悊</div><div class="section-sub">绠＄悊鎵€鏈夊鐢熻处鍙蜂笌瀵嗙爜</div></div>
+      <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="openAdminStudentModal('add')">锛?鏂板瀛︾敓</button>
+    </div>
+    <div class="card">
+      <table class="student-table" id="adminStudentTable">
+        <thead>
+          <tr><th>濮撳悕</th><th>鐝骇鐮?/th><th>鍒涘缓鏃堕棿</th><th>鎿嶄綔</th></tr>
+        </thead>
+        <tbody id="adminStudentBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- A: 淇敼瀵嗙爜 -->
+  <div class="page" id="a-password">
+    <div class="card" style="max-width:480px;margin:0 auto">
+      <div class="card-title">淇敼绠＄悊鍛樺瘑鐮?/div>
+      <div class="card-sub">淇敼褰撳墠绠＄悊鍛樿处鍙风殑鐧诲綍瀵嗙爜</div>
+      <div class="editor-form-row">
+        <label>褰撳墠瀵嗙爜</label>
+        <input class="editor-input" id="ap_oldPwd" type="password" placeholder="璇疯緭鍏ュ綋鍓嶅瘑鐮?>
+      </div>
+      <div class="editor-form-row">
+        <label>鏂板瘑鐮?/label>
+        <input class="editor-input" id="ap_newPwd" type="password" placeholder="璇疯緭鍏ユ柊瀵嗙爜">
+      </div>
+      <div class="editor-form-row">
+        <label>纭鏂板瘑鐮?/label>
+        <input class="editor-input" id="ap_confirmPwd" type="password" placeholder="璇峰啀娆¤緭鍏ユ柊瀵嗙爜">
+      </div>
+      <div id="ap_error" style="font-size:12px;color:var(--coral);margin-bottom:12px;display:none"></div>
+      <button class="btn-primary" style="width:100%;padding:10px;font-size:13px" onclick="submitAdminChangePwd()">纭淇敼</button>
     </div>
   </div>
 </div>
@@ -612,17 +681,18 @@ nav{
 <div id="studentApp" style="display:none">
   <nav>
     <div class="nav-brand">
-      <div class="nav-logo">政</div>
-      高中思政学习系统
+      <div class="nav-logo">鏀?/div>
+      楂樹腑鎬濇斂瀛︿範绯荤粺
     </div>
     <div class="nav-tabs">
-      <button class="nav-tab active" onclick="switchStudentPage('s-home')">学习中心</button>
-      <button class="nav-tab" onclick="switchStudentPage('s-ai')">AI智能辅导</button>
-      <button class="nav-tab" onclick="switchStudentPage('s-report')">我的报告</button>
+      <button class="nav-tab active" onclick="switchStudentPage('s-home')">瀛︿範涓績</button>
+      <button class="nav-tab" onclick="switchStudentPage('s-ai')">AI鏅鸿兘杈呭</button>
+      <button class="nav-tab" onclick="switchStudentPage('s-report')">鎴戠殑鎶ュ憡</button>
     </div>
     <div class="nav-right">
-      <span class="chip chip-green" id="studentNameChip">同学</span>
-      <button class="btn-sm" onclick="backToRole()">切换角色</button>
+      <button class="btn-sm" onclick="openChangePwdModal()">淇敼瀵嗙爜</button>
+      <span class="chip chip-green" id="studentNameChip">鍚屽</span>
+      <button class="btn-sm" onclick="backToRole()">鍒囨崲瑙掕壊</button>
     </div>
   </nav>
 
@@ -630,7 +700,7 @@ nav{
   <div class="page active" id="s-home">
     <div id="studentProfileHeader"></div>
     <div class="section-header">
-      <div><div class="section-label">选择教材，开始学习</div></div>
+      <div><div class="section-label">閫夋嫨鏁欐潗锛屽紑濮嬪涔?/div></div>
     </div>
     <div class="book-tabs" id="studentBookTabs"></div>
     <div id="studentChapters"></div>
@@ -639,35 +709,35 @@ nav{
   <!-- S: AI -->
   <div class="page" id="s-ai">
     <div class="section-header">
-      <div><div class="section-label">AI智能辅导助手</div>
-        <div class="section-sub">基于你的学习数据，为你提供个性化知识辅导</div>
+      <div><div class="section-label">AI鏅鸿兘杈呭鍔╂墜</div>
+        <div class="section-sub">鍩轰簬浣犵殑瀛︿範鏁版嵁锛屼负浣犳彁渚涗釜鎬у寲鐭ヨ瘑杈呭</div>
       </div>
     </div>
     <div class="grid-2" style="align-items:start">
       <div class="chat-wrap" id="chatWrap">
         <div class="chat-header">
-          <div class="chat-avatar">🤖</div>
+          <div class="chat-avatar">馃</div>
           <div class="chat-header-info">
-            <h3>思政AI学习助手</h3>
-            <p>基于你的答题记录 · 针对性辅导</p>
+            <h3>鎬濇斂AI瀛︿範鍔╂墜</h3>
+            <p>鍩轰簬浣犵殑绛旈璁板綍 路 閽堝鎬ц緟瀵?/p>
           </div>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-quick-btns" id="chatQuickBtns"></div>
         <div class="chat-input-area">
-          <textarea class="chat-input" id="chatInput" placeholder="输入你的问题..." rows="1"
+          <textarea class="chat-input" id="chatInput" placeholder="杈撳叆浣犵殑闂..." rows="1"
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
-          <button class="chat-send" onclick="sendChat()">➤</button>
+          <button class="chat-send" onclick="sendChat()">鉃?/button>
         </div>
       </div>
       <div>
         <div class="card" style="margin-bottom:12px">
-          <div class="card-title">我的薄弱知识点</div>
-          <div class="card-sub">根据答题记录自动识别</div>
+          <div class="card-title">鎴戠殑钖勫急鐭ヨ瘑鐐?/div>
+          <div class="card-sub">鏍规嵁绛旈璁板綍鑷姩璇嗗埆</div>
           <div id="weakPoints" style="margin-top:8px"></div>
         </div>
         <div class="card">
-          <div class="card-title">本周学习进展</div>
+          <div class="card-title">鏈懆瀛︿範杩涘睍</div>
           <div id="weekProgress" style="margin-top:8px"></div>
         </div>
       </div>
@@ -677,52 +747,135 @@ nav{
   <!-- S: REPORT -->
   <div class="page" id="s-report">
     <div class="section-header">
-      <div><div class="section-label">我的学习成长报告</div>
-        <div class="section-sub">学科素养达成 · 五大关键能力 · 全过程学习轨迹</div>
+      <div><div class="section-label">鎴戠殑瀛︿範鎴愰暱鎶ュ憡</div>
+        <div class="section-sub">瀛︾绱犲吇杈炬垚 路 浜斿ぇ鍏抽敭鑳藉姏 路 鍏ㄨ繃绋嬪涔犺建杩?/div>
       </div>
-      <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="exportStudentReport()">导出报告</button>
+      <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="exportStudentReport()">瀵煎嚭鎶ュ憡</button>
     </div>
 
     <div class="grid-2" style="margin-bottom:16px">
       <div class="card radar-section">
-        <div class="card-title">五大关键能力雷达图</div>
-        <div class="card-sub">基于高考评价体系的思政学科关键能力综合画像</div>
+        <div class="card-title">浜斿ぇ鍏抽敭鑳藉姏闆疯揪鍥?/div>
+        <div class="card-sub">鍩轰簬楂樿€冭瘎浠蜂綋绯荤殑鎬濇斂瀛︾鍏抽敭鑳藉姏缁煎悎鐢诲儚</div>
         <div class="chart-wrap">
-          <canvas id="studentRadarChart" role="img" aria-label="学生能力雷达图">个人能力雷达</canvas>
+          <canvas id="studentRadarChart" role="img" aria-label="瀛︾敓鑳藉姏闆疯揪鍥?>涓汉鑳藉姏闆疯揪</canvas>
         </div>
         <div class="radar-legend" id="radarLegend"></div>
       </div>
       <div>
         <div class="card" style="margin-bottom:12px">
-          <div class="card-title">学科素养达成程度</div>
-          <div class="card-sub">政治认同 · 科学精神 · 法治意识 · 公共参与</div>
+          <div class="card-title">瀛︾绱犲吇杈炬垚绋嬪害</div>
+          <div class="card-sub">鏀挎不璁ゅ悓 路 绉戝绮剧 路 娉曟不鎰忚瘑 路 鍏叡鍙備笌</div>
           <div id="competencyBars" style="margin-top:12px"></div>
         </div>
         <div class="card" style="margin-bottom:12px">
-          <div class="card-title">7本教材知识掌握</div>
-          <div class="card-sub">各书掌握率（基于课前/中/后综合）</div>
+          <div class="card-title">7鏈暀鏉愮煡璇嗘帉鎻?/div>
+          <div class="card-sub">鍚勪功鎺屾彙鐜囷紙鍩轰簬璇惧墠/涓?鍚庣患鍚堬級</div>
           <div id="bookMasteryBars" style="margin-top:12px"></div>
         </div>
         <div class="card">
-          <div class="card-title">增值成长指数</div>
-          <div class="card-sub">与入学基线相比的成长幅度</div>
+          <div class="card-title">澧炲€兼垚闀挎寚鏁?/div>
+          <div class="card-sub">涓庡叆瀛﹀熀绾跨浉姣旂殑鎴愰暱骞呭害</div>
           <div style="position:relative;height:150px">
-            <canvas id="growthLineChart" role="img" aria-label="成长趋势折线图">成长趋势</canvas>
+            <canvas id="growthLineChart" role="img" aria-label="鎴愰暱瓒嬪娍鎶樼嚎鍥?>鎴愰暱瓒嬪娍</canvas>
           </div>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">学习轨迹时间线</div>
-      <div class="card-sub">记录每一次测评与成长节点</div>
+      <div class="card-title">瀛︿範杞ㄨ抗鏃堕棿绾?/div>
+      <div class="card-sub">璁板綍姣忎竴娆℃祴璇勪笌鎴愰暱鑺傜偣</div>
       <div id="learningTimeline" style="margin-top:16px;max-height:320px;overflow-y:auto"></div>
     </div>
 
     <div class="card" style="margin-top:16px">
-      <div class="card-title">个人综合评语</div>
-      <div class="card-sub">AI基于全过程数据生成的深度学习画像</div>
+      <div class="card-title">涓汉缁煎悎璇勮</div>
+      <div class="card-sub">AI鍩轰簬鍏ㄨ繃绋嬫暟鎹敓鎴愮殑娣卞害瀛︿範鐢诲儚</div>
       <div id="personalComment" style="margin-top:12px;font-size:13px;color:var(--gray-700);line-height:1.8"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN: 鏂板/缂栬緫鏁欏笀寮圭獥 ===== -->
+<div class="editor-modal-overlay" id="adminTeacherModal">
+  <div class="editor-modal sm">
+    <div class="modal-head">
+      <div class="modal-title" id="adminTeacherTitle">鏂板鏁欏笀</div>
+      <button class="modal-close" onclick="closeEditorModal('adminTeacherModal')">鉁?/button>
+    </div>
+    <input type="hidden" id="at_origCode">
+    <div class="editor-form-row">
+      <label>鐝骇鐮?/label>
+      <input class="editor-input" id="at_classCode" placeholder="渚嬪锛歋ZPJ2026A">
+    </div>
+    <div class="editor-form-row">
+      <label>鏁欏笀濮撳悕</label>
+      <input class="editor-input" id="at_teacherName" placeholder="璇疯緭鍏ユ暀甯堝鍚?>
+    </div>
+    <div class="editor-form-row">
+      <label>绠＄悊瀵嗙爜</label>
+      <input class="editor-input" id="at_password" type="password" placeholder="璇疯緭鍏ョ鐞嗗瘑鐮?>
+    </div>
+    <div id="at_error" style="font-size:12px;color:var(--coral);margin-bottom:12px;display:none"></div>
+    <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn-ghost" onclick="closeEditorModal('adminTeacherModal')">鍙栨秷</button>
+      <button class="btn-primary" onclick="saveAdminTeacher()">淇濆瓨</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN: 鏂板/缂栬緫瀛︾敓寮圭獥 ===== -->
+<div class="editor-modal-overlay" id="adminStudentModal">
+  <div class="editor-modal sm">
+    <div class="modal-head">
+      <div class="modal-title" id="adminStudentTitle">鏂板瀛︾敓</div>
+      <button class="modal-close" onclick="closeEditorModal('adminStudentModal')">鉁?/button>
+    </div>
+    <input type="hidden" id="as_origId">
+    <div class="editor-form-row">
+      <label>瀛︾敓濮撳悕</label>
+      <input class="editor-input" id="as_name" placeholder="璇疯緭鍏ュ鐢熷鍚?>
+    </div>
+    <div class="editor-form-row">
+      <label>鐝骇鐮?/label>
+      <input class="editor-input" id="as_classCode" placeholder="渚嬪锛歋ZPJ2026A">
+    </div>
+    <div class="editor-form-row">
+      <label>鐧诲綍瀵嗙爜</label>
+      <input class="editor-input" id="as_password" type="password" placeholder="璇疯緭鍏ョ櫥褰曞瘑鐮?>
+    </div>
+    <div id="as_error" style="font-size:12px;color:var(--coral);margin-bottom:12px;display:none"></div>
+    <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn-ghost" onclick="closeEditorModal('adminStudentModal')">鍙栨秷</button>
+      <button class="btn-primary" onclick="saveAdminStudent()">淇濆瓨</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 閫氱敤淇敼瀵嗙爜寮圭獥锛堟暀甯?瀛︾敓锛?==== -->
+<div class="editor-modal-overlay" id="changePwdModal">
+  <div class="editor-modal sm">
+    <div class="modal-head">
+      <div class="modal-title">淇敼瀵嗙爜</div>
+      <button class="modal-close" onclick="closeEditorModal('changePwdModal')">鉁?/button>
+    </div>
+    <div class="editor-form-row">
+      <label>褰撳墠瀵嗙爜</label>
+      <input class="editor-input" id="cp_oldPwd" type="password" placeholder="璇疯緭鍏ュ綋鍓嶅瘑鐮?>
+    </div>
+    <div class="editor-form-row">
+      <label>鏂板瘑鐮?/label>
+      <input class="editor-input" id="cp_newPwd" type="password" placeholder="璇疯緭鍏ユ柊瀵嗙爜">
+    </div>
+    <div class="editor-form-row">
+      <label>纭鏂板瘑鐮?/label>
+      <input class="editor-input" id="cp_confirmPwd" type="password" placeholder="璇峰啀娆¤緭鍏ユ柊瀵嗙爜">
+    </div>
+    <div id="cp_error" style="font-size:12px;color:var(--coral);margin-bottom:12px;display:none"></div>
+    <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn-ghost" onclick="closeEditorModal('changePwdModal')">鍙栨秷</button>
+      <button class="btn-primary" onclick="submitChangePwd()">纭淇敼</button>
     </div>
   </div>
 </div>
@@ -731,8 +884,8 @@ nav{
 <div class="modal-overlay" id="quizModal">
   <div class="modal" id="quizModalInner">
     <div class="modal-head">
-      <div class="modal-title" id="quizModalTitle">课前测试</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-title" id="quizModalTitle">璇惧墠娴嬭瘯</div>
+      <button class="modal-close" onclick="closeModal()">鉁?/button>
     </div>
     <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill" style="width:10%"></div></div>
     <div id="quizBody"></div>
@@ -748,30 +901,30 @@ nav{
 <div class="editor-modal-overlay" id="editorBookModal">
   <div class="editor-modal sm">
     <div class="modal-head">
-      <div class="modal-title" id="editorBookTitle">新增教材</div>
-      <button class="modal-close" onclick="closeEditorModal('editorBookModal')">✕</button>
+      <div class="modal-title" id="editorBookTitle">鏂板鏁欐潗</div>
+      <button class="modal-close" onclick="closeEditorModal('editorBookModal')">鉁?/button>
     </div>
     <div class="editor-form-row">
-      <label>教材简称（如：必修1、选必2）</label>
-      <input class="editor-input" id="eb_name" placeholder="必修1">
+      <label>鏁欐潗绠€绉帮紙濡傦細蹇呬慨1銆侀€夊繀2锛?/label>
+      <input class="editor-input" id="eb_name" placeholder="蹇呬慨1">
     </div>
     <div class="editor-form-row">
-      <label>教材全名</label>
-      <input class="editor-input" id="eb_fullName" placeholder="中国特色社会主义">
+      <label>鏁欐潗鍏ㄥ悕</label>
+      <input class="editor-input" id="eb_fullName" placeholder="涓浗鐗硅壊绀句細涓讳箟">
     </div>
     <div class="editor-form-row" style="flex-direction:row;align-items:center;gap:12px">
       <div style="flex:1">
-        <label>主题色</label>
+        <label>涓婚鑹?/label>
         <input type="color" class="editor-input" id="eb_color" value="#185FA5">
       </div>
       <div style="flex:1">
-        <label>背景色</label>
+        <label>鑳屾櫙鑹?/label>
         <input type="color" class="editor-input" id="eb_bg" value="#E6F1FB">
       </div>
     </div>
     <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn-ghost" onclick="closeEditorModal('editorBookModal')">取消</button>
-      <button class="btn-primary" onclick="saveBook()">保存教材</button>
+      <button class="btn-ghost" onclick="closeEditorModal('editorBookModal')">鍙栨秷</button>
+      <button class="btn-primary" onclick="saveBook()">淇濆瓨鏁欐潗</button>
     </div>
   </div>
 </div>
@@ -780,16 +933,16 @@ nav{
 <div class="editor-modal-overlay" id="editorChapterModal">
   <div class="editor-modal sm">
     <div class="modal-head">
-      <div class="modal-title" id="editorChapterTitle">新增章节</div>
-      <button class="modal-close" onclick="closeEditorModal('editorChapterModal')">✕</button>
+      <div class="modal-title" id="editorChapterTitle">鏂板绔犺妭</div>
+      <button class="modal-close" onclick="closeEditorModal('editorChapterModal')">鉁?/button>
     </div>
     <div class="editor-form-row">
-      <label>章节名称</label>
-      <input class="editor-input" id="ec_name" placeholder="第一课 示例章节名称">
+      <label>绔犺妭鍚嶇О</label>
+      <input class="editor-input" id="ec_name" placeholder="绗竴璇?绀轰緥绔犺妭鍚嶇О">
     </div>
     <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn-ghost" onclick="closeEditorModal('editorChapterModal')">取消</button>
-      <button class="btn-primary" onclick="saveChapter()">保存章节</button>
+      <button class="btn-ghost" onclick="closeEditorModal('editorChapterModal')">鍙栨秷</button>
+      <button class="btn-primary" onclick="saveChapter()">淇濆瓨绔犺妭</button>
     </div>
   </div>
 </div>
@@ -798,16 +951,16 @@ nav{
 <div class="editor-modal-overlay" id="editorLessonModal">
   <div class="editor-modal sm">
     <div class="modal-head">
-      <div class="modal-title" id="editorLessonTitle">新增课时</div>
-      <button class="modal-close" onclick="closeEditorModal('editorLessonModal')">✕</button>
+      <div class="modal-title" id="editorLessonTitle">鏂板璇炬椂</div>
+      <button class="modal-close" onclick="closeEditorModal('editorLessonModal')">鉁?/button>
     </div>
     <div class="editor-form-row">
-      <label>课时名称</label>
-      <input class="editor-input" id="el_name" placeholder="1.1 示例课时名称">
+      <label>璇炬椂鍚嶇О</label>
+      <input class="editor-input" id="el_name" placeholder="1.1 绀轰緥璇炬椂鍚嶇О">
     </div>
     <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn-ghost" onclick="closeEditorModal('editorLessonModal')">取消</button>
-      <button class="btn-primary" onclick="saveLesson()">保存课时</button>
+      <button class="btn-ghost" onclick="closeEditorModal('editorLessonModal')">鍙栨秷</button>
+      <button class="btn-primary" onclick="saveLesson()">淇濆瓨璇炬椂</button>
     </div>
   </div>
 </div>
@@ -817,49 +970,49 @@ nav{
   <div class="editor-modal lg">
     <div class="modal-head">
       <div>
-        <div class="modal-title" id="editorQTitle">管理题目</div>
+        <div class="modal-title" id="editorQTitle">绠＄悊棰樼洰</div>
         <div style="font-size:11px;color:var(--gray-400);margin-top:2px" id="editorQSubtitle"></div>
       </div>
-      <button class="modal-close" onclick="closeEditorModal('editorQModal')">✕</button>
+      <button class="modal-close" onclick="closeEditorModal('editorQModal')">鉁?/button>
     </div>
 
-    <!-- 现有题目列表 -->
+    <!-- 鐜版湁棰樼洰鍒楄〃 -->
     <div id="editorQList"></div>
 
-    <!-- 新增题目表单 -->
-    <div class="editor-section-title">➕ 新增题目</div>
+    <!-- 鏂板棰樼洰琛ㄥ崟 -->
+    <div class="editor-section-title">鉃?鏂板棰樼洰</div>
     <div class="editor-form-row">
-      <label>题目类型</label>
+      <label>棰樼洰绫诲瀷</label>
       <div class="tag-row">
-        <div class="tag-chip sel" id="qtype_mcq" onclick="switchQType('mcq')">选择题</div>
-        <div class="tag-chip" id="qtype_open" onclick="switchQType('open')">开放分析题</div>
+        <div class="tag-chip sel" id="qtype_mcq" onclick="switchQType('mcq')">閫夋嫨棰?/div>
+        <div class="tag-chip" id="qtype_open" onclick="switchQType('open')">寮€鏀惧垎鏋愰</div>
       </div>
     </div>
     <div class="editor-form-row">
-      <label>题目内容</label>
-      <textarea class="editor-textarea" id="nq_text" placeholder="请输入题目内容..."></textarea>
+      <label>棰樼洰鍐呭</label>
+      <textarea class="editor-textarea" id="nq_text" placeholder="璇疯緭鍏ラ鐩唴瀹?.."></textarea>
     </div>
     <div id="nq_opts_wrap">
-      <div class="editor-section-title" style="margin-top:8px;font-size:12px">选项（点击左侧单选按钮标记正确答案）</div>
+      <div class="editor-section-title" style="margin-top:8px;font-size:12px">閫夐」锛堢偣鍑诲乏渚у崟閫夋寜閽爣璁版纭瓟妗堬級</div>
       <div id="nq_opts_list">
-        <div class="opt-input-row"><input type="radio" name="nq_correct" class="radio-correct" value="0" checked><input class="editor-input" placeholder="选项A" id="nq_opt0"><button class="btn-danger-sm" onclick="removeOpt(0)">删除</button></div>
-        <div class="opt-input-row"><input type="radio" name="nq_correct" class="radio-correct" value="1"><input class="editor-input" placeholder="选项B" id="nq_opt1"><button class="btn-danger-sm" onclick="removeOpt(1)">删除</button></div>
-        <div class="opt-input-row"><input type="radio" name="nq_correct" class="radio-correct" value="2"><input class="editor-input" placeholder="选项C" id="nq_opt2"><button class="btn-danger-sm" onclick="removeOpt(2)">删除</button></div>
-        <div class="opt-input-row"><input type="radio" name="nq_correct" class="radio-correct" value="3"><input class="editor-input" placeholder="选项D" id="nq_opt3"><button class="btn-danger-sm" onclick="removeOpt(3)">删除</button></div>
+        <div class="opt-input-row"><input type="radio" name="nq_correct" class="radio-correct" value="0" checked><input class="editor-input" placeholder="閫夐」A" id="nq_opt0"><button class="btn-danger-sm" onclick="removeOpt(0)">鍒犻櫎</button></div>
+        <div class="opt-input-row"><input type="radio" name="nq_correct" class="radio-correct" value="1"><input class="editor-input" placeholder="閫夐」B" id="nq_opt1"><button class="btn-danger-sm" onclick="removeOpt(1)">鍒犻櫎</button></div>
+        <div class="opt-input-row"><input type="radio" name="nq_correct" class="radio-correct" value="2"><input class="editor-input" placeholder="閫夐」C" id="nq_opt2"><button class="btn-danger-sm" onclick="removeOpt(2)">鍒犻櫎</button></div>
+        <div class="opt-input-row"><input type="radio" name="nq_correct" class="radio-correct" value="3"><input class="editor-input" placeholder="閫夐」D" id="nq_opt3"><button class="btn-danger-sm" onclick="removeOpt(3)">鍒犻櫎</button></div>
       </div>
-      <button class="btn-success-sm" style="margin-top:6px" onclick="addOpt()">+ 添加选项</button>
+      <button class="btn-success-sm" style="margin-top:6px" onclick="addOpt()">+ 娣诲姞閫夐」</button>
     </div>
     <div class="editor-form-row" style="margin-top:12px">
-      <label>解析（选填）</label>
-      <textarea class="editor-textarea" id="nq_explain" placeholder="本题知识点解析，帮助学生理解..."></textarea>
+      <label>瑙ｆ瀽锛堥€夊～锛?/label>
+      <textarea class="editor-textarea" id="nq_explain" placeholder="鏈鐭ヨ瘑鐐硅В鏋愶紝甯姪瀛︾敓鐞嗚В..."></textarea>
     </div>
     <div class="editor-form-row">
-      <label>关联能力维度</label>
+      <label>鍏宠仈鑳藉姏缁村害</label>
       <div class="tag-row" id="nq_ability_tags"></div>
     </div>
     <div style="text-align:right;margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn-ghost" onclick="closeEditorModal('editorQModal')">关闭</button>
-      <button class="btn-primary" onclick="addQuestion()">添加题目</button>
+      <button class="btn-ghost" onclick="closeEditorModal('editorQModal')">鍏抽棴</button>
+      <button class="btn-primary" onclick="addQuestion()">娣诲姞棰樼洰</button>
     </div>
   </div>
 </div>
@@ -878,54 +1031,63 @@ let realtimeChannel = null;
 function initSupabase(){
   try{
     if(typeof window.supabase==='undefined' || !window.supabase.createClient){
-      console.log('[Cloud] Supabase SDK 未加载，使用本地模式');
+      console.log('[Cloud] Supabase SDK 鏈姞杞斤紝浣跨敤鏈湴妯″紡');
       return;
     }
     if(!SUPABASE_CONFIG.url || SUPABASE_CONFIG.url==='YOUR_SUPABASE_URL'){
-      console.log('[Cloud] 未配置 Supabase，使用本地模式');
+      console.log('[Cloud] 鏈厤缃?Supabase锛屼娇鐢ㄦ湰鍦版ā寮?);
       return;
     }
     db = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
     cloudConnected = true;
-    console.log('[Cloud] Supabase 客户端初始化成功');
+    console.log('[Cloud] Supabase 瀹㈡埛绔垵濮嬪寲鎴愬姛');
   }catch(e){
-    console.warn('[Cloud] Supabase 初始化失败:', e);
+    console.warn('[Cloud] Supabase 鍒濆鍖栧け璐?', e);
   }
 }
 
-// ── Login UI helpers ──
+// 鈹€鈹€ Login UI helpers 鈹€鈹€
 function selectLoginRole(role){
   currentUserRole = role;
   document.getElementById('loginRoleTeacher').classList.toggle('selected', role==='teacher');
+  document.getElementById('loginRoleAdmin').classList.toggle('selected', role==='admin');
   document.getElementById('loginRoleStudent').classList.toggle('selected', role==='student');
-  // 始终显示密码区，根据角色切换标签文案
+  // 濮嬬粓鏄剧ず瀵嗙爜鍖猴紝鏍规嵁瑙掕壊鍒囨崲鏍囩鏂囨
   var pwLabel = document.getElementById('loginPasswordLabel');
   var pwHint = document.getElementById('loginPasswordHint');
   var pwInput = document.getElementById('loginPassword');
+  var ccInput = document.getElementById('loginClassCode');
   if(role==='teacher'){
-    pwLabel.textContent = '管理密码';
-    pwInput.placeholder = '教师设置的管理密码';
-    pwHint.textContent = '首次使用将自动创建班级，此密码即为班级管理密码';
+    pwLabel.textContent = '绠＄悊瀵嗙爜';
+    pwInput.placeholder = '鏁欏笀璁剧疆鐨勭鐞嗗瘑鐮?;
+    pwHint.textContent = '棣栨浣跨敤灏嗚嚜鍔ㄥ垱寤虹彮绾э紝姝ゅ瘑鐮佸嵆涓虹彮绾х鐞嗗瘑鐮?;
+    ccInput.placeholder = '渚嬪锛歋ZPJ2026A';
+  } else if(role==='admin'){
+    pwLabel.textContent = '绠＄悊瀵嗙爜';
+    pwInput.placeholder = '璇疯緭鍏ョ鐞嗗憳瀵嗙爜';
+    pwHint.textContent = '绠＄悊鍛樺彲绠＄悊鎵€鏈夋暀甯堝拰瀛︾敓璐﹀彿';
+    ccInput.placeholder = '绠＄悊鍛樻棤闇€鐝骇鐮侊紙鍙€夊～锛?;
   } else {
-    pwLabel.textContent = '登录密码';
-    pwInput.placeholder = '请输入密码（首次登录即设置）';
-    pwHint.textContent = '首次登录请设置个人密码，后续登录凭此密码进入';
+    pwLabel.textContent = '鐧诲綍瀵嗙爜';
+    pwInput.placeholder = '璇疯緭鍏ュ瘑鐮侊紙棣栨鐧诲綍鍗宠缃級';
+    pwHint.textContent = '棣栨鐧诲綍璇疯缃釜浜哄瘑鐮侊紝鍚庣画鐧诲綍鍑瀵嗙爜杩涘叆';
+    ccInput.placeholder = '渚嬪锛歋ZPJ2026A';
   }
 }
 
-// ── Login handler ──
+// 鈹€鈹€ Login handler 鈹€鈹€
 async function handleLogin(){
   const classCode = document.getElementById('loginClassCode').value.trim().toUpperCase();
   const name = document.getElementById('loginName').value.trim();
   const password = document.getElementById('loginPassword').value;
   const errEl = document.getElementById('loginError');
 
-  if(!classCode){ showLoginError('请输入班级码'); return; }
-  if(!name){ showLoginError('请输入姓名'); return; }
-  if(!currentUserRole){ showLoginError('请选择登录身份'); return; }
+  if(!classCode && currentUserRole!=='admin'){ showLoginError('璇疯緭鍏ョ彮绾х爜'); return; }
+  if(!name){ showLoginError('璇疯緭鍏ュ鍚?); return; }
+  if(!currentUserRole){ showLoginError('璇烽€夋嫨鐧诲綍韬唤'); return; }
 
   errEl.style.display='none';
-  setStatus('正在连接...');
+  setStatus('姝ｅ湪杩炴帴...');
 
   currentClassCode = classCode;
   currentUserName = name;
@@ -935,7 +1097,21 @@ async function handleLogin(){
 
   if(cloudConnected){
     try{
-      if(currentUserRole==='teacher'){
+      if(currentUserRole==='admin'){
+        // 绠＄悊鍛橀獙璇?        if(!password){ showLoginError('璇疯緭鍏ョ鐞嗗憳瀵嗙爜'); setStatus(''); return; }
+        const {data: admins, error: admErr} = await db
+          .from('users').select('password')
+          .eq('name', name).eq('role','admin').limit(1);
+        if(admErr){ showLoginError('鏌ヨ澶辫触: '+admErr.message); setStatus(''); return; }
+        if(!admins || admins.length===0){
+          // 鏂扮鐞嗗憳棣栨鐧诲綍锛氳嚜鍔ㄥ垱寤鸿处鍙?          await db.from('users').insert({name, role:'admin', password});
+        } else {
+          if(admins[0].password !== password){
+            showLoginError('绠＄悊鍛樺瘑鐮侀敊璇?); setStatus(''); return;
+          }
+        }
+      }
+      else if(currentUserRole==='teacher'){
         // Check if class exists
         const {data: cls, error} = await db
           .from('class_config')
@@ -946,25 +1122,24 @@ async function handleLogin(){
         if(cls){
           // Existing class: verify password
           if(cls.teacher_password !== password){
-            showLoginError('管理密码错误'); setStatus(''); return;
+            showLoginError('绠＄悊瀵嗙爜閿欒'); setStatus(''); return;
           }
           // Update teacher name
           await db.from('class_config').update({teacher_name:name}).eq('class_code',classCode);
         } else {
           // Create new class
-          if(!password){ showLoginError('首次创建班级请设置管理密码'); setStatus(''); return; }
+          if(!password){ showLoginError('棣栨鍒涘缓鐝骇璇疯缃鐞嗗瘑鐮?); setStatus(''); return; }
           const {error: ce} = await db.from('class_config').insert({
             class_code:classCode, teacher_name:name, teacher_password:password
           });
-          if(ce){ showLoginError('创建班级失败: '+ce.message); setStatus(''); return; }
+          if(ce){ showLoginError('鍒涘缓鐝骇澶辫触: '+ce.message); setStatus(''); return; }
           // Seed default books/qbank
           await cloudWrite('books', DEFAULT_BOOKS);
           await cloudWrite('qbank', DEFAULT_QBANK);
         }
       }
       if(currentUserRole==='student'){
-        // 学生端密码验证
-        if(!password){ showLoginError('请输入登录密码（首次登录即设置）'); setStatus(''); return; }
+        // 瀛︾敓绔瘑鐮侀獙璇?        if(!password){ showLoginError('璇疯緭鍏ョ櫥褰曞瘑鐮侊紙棣栨鐧诲綍鍗宠缃級'); setStatus(''); return; }
         const {data: stuUsers, error: stuErr} = await db
           .from('users')
           .select('password')
@@ -974,13 +1149,12 @@ async function handleLogin(){
           .order('created_at', {ascending:false})
           .limit(1);
         if(!stuErr && stuUsers && stuUsers.length>0){
-          // 老学生：验证密码
+          // 鑰佸鐢燂細楠岃瘉瀵嗙爜
           if(stuUsers[0].password !== password){
-            showLoginError('密码错误'); setStatus(''); return;
+            showLoginError('瀵嗙爜閿欒'); setStatus(''); return;
           }
         }
-        // 新学生：密码已输入，下面 upsert 时自动存入
-      }
+        // 鏂板鐢燂細瀵嗙爜宸茶緭鍏ワ紝涓嬮潰 upsert 鏃惰嚜鍔ㄥ瓨鍏?      }
 
       // Register/login user
       await db.from('users').upsert({
@@ -989,30 +1163,27 @@ async function handleLogin(){
       }, {onConflict:'id'});
 
       // Load cloud data
-      setStatus('正在同步数据...');
+      setStatus('姝ｅ湪鍚屾鏁版嵁...');
       await loadCloudData();
       startRealtime();
-      setStatus('✓ 云端已连接');
+      setStatus('鉁?浜戠宸茶繛鎺?);
       setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
     }catch(e){
-      console.error('[Cloud] 登录验证失败:', e);
-      // 教师端必须通过云端验证密码，不能放行
-      if(currentUserRole==='teacher'){
-        showLoginError('网络连接失败，无法验证身份，请检查网络后重试');
+      console.error('[Cloud] 鐧诲綍楠岃瘉澶辫触:', e);
+      // 鏁欏笀绔繀椤婚€氳繃浜戠楠岃瘉瀵嗙爜锛屼笉鑳芥斁琛?      if(currentUserRole==='teacher'){
+        showLoginError('缃戠粶杩炴帴澶辫触锛屾棤娉曢獙璇佽韩浠斤紝璇锋鏌ョ綉缁滃悗閲嶈瘯');
         setStatus('');
         return;
       }
-      // 学生端允许离线登录（输入班级码+姓名即可）
-      console.warn('[Cloud] 学生端离线登录');
+      // 瀛︾敓绔厑璁哥绾跨櫥褰曪紙杈撳叆鐝骇鐮?濮撳悕鍗冲彲锛?      console.warn('[Cloud] 瀛︾敓绔绾跨櫥褰?);
     }
   } else {
-    // 云端未连接
-    if(currentUserRole==='teacher'){
-      showLoginError('云端未连接，教师端无法登录');
+    // 浜戠鏈繛鎺?    if(currentUserRole==='teacher'){
+      showLoginError('浜戠鏈繛鎺ワ紝鏁欏笀绔棤娉曠櫥褰?);
       setStatus('');
       return;
     }
-    setStatus('本地模式（未配置云端）');
+    setStatus('鏈湴妯″紡锛堟湭閰嶇疆浜戠锛?);
   }
 
   // Enter app
@@ -1021,10 +1192,13 @@ async function handleLogin(){
   if(currentUserRole==='teacher'){
     document.getElementById('teacherApp').style.display='block';
     initTeacherApp();
+  } else if(currentUserRole==='admin'){
+    document.getElementById('adminApp').style.display='block';
+    initAdminApp();
   } else {
     currentStudentName = name;
     document.getElementById('studentApp').style.display='block';
-    document.getElementById('studentNameChip').textContent = name+'同学';
+    document.getElementById('studentNameChip').textContent = name+'鍚屽';
     initStudentApp();
   }
 }
@@ -1038,7 +1212,7 @@ function setStatus(msg){
   document.getElementById('loginStatus').textContent = msg;
 }
 
-// ── Cloud read/write ──
+// 鈹€鈹€ Cloud read/write 鈹€鈹€
 async function cloudWrite(key, data){
   if(!cloudConnected||!currentClassCode) return;
   try{
@@ -1089,7 +1263,7 @@ async function loadCloudData(){
   }
 }
 
-// ── Realtime subscription ──
+// 鈹€鈹€ Realtime subscription 鈹€鈹€
 function startRealtime(){
   if(!cloudConnected||!currentClassCode||realtimeChannel) return;
   try{
@@ -1106,10 +1280,10 @@ function startRealtime(){
               BOOKS = data; saveBooks();
               if(currentRole==='teacher'){renderTeacherBookTabs();renderTeacherChapters(currentBookIdx);}
               if(currentRole==='student'){renderStudentBookTabs();renderStudentChapters(currentBookIdx);}
-              toast('课程数据已更新');
+              toast('璇剧▼鏁版嵁宸叉洿鏂?);
             } else if(key==='qbank'){
               QBANK = data; saveQBank();
-              toast('题库数据已更新');
+              toast('棰樺簱鏁版嵁宸叉洿鏂?);
             } else if(key.startsWith('student_')){
               const sName = key.replace('student_','');
               studentData[sName] = data; saveData();
@@ -1128,141 +1302,141 @@ function startRealtime(){
 // DATA: 7 BOOKS + CHAPTERS + QUESTIONS (Dynamic, stored in localStorage)
 // ================================================================
 const DEFAULT_BOOKS = [
-  {id:'b1', name:'必修1', fullName:'中国特色社会主义', color:'#185FA5', bg:'#E6F1FB',
+  {id:'b1', name:'蹇呬慨1', fullName:'涓浗鐗硅壊绀句細涓讳箟', color:'#185FA5', bg:'#E6F1FB',
    chapters:[
-    {name:'第一课 社会主义从空想到科学、从理论到实践的发展', lessons:[
-      {name:'1.1 原始社会的解体和阶级社会的演进'},
-      {name:'1.2 马克思主义的诞生和发展'},
+    {name:'绗竴璇?绀句細涓讳箟浠庣┖鎯冲埌绉戝銆佷粠鐞嗚鍒板疄璺电殑鍙戝睍', lessons:[
+      {name:'1.1 鍘熷绀句細鐨勮В浣撳拰闃剁骇绀句細鐨勬紨杩?},
+      {name:'1.2 椹厠鎬濅富涔夌殑璇炵敓鍜屽彂灞?},
     ]},
-    {name:'第二课 只有社会主义才能救中国', lessons:[
-      {name:'2.1 新民主主义革命的胜利'},
-      {name:'2.2 社会主义制度在中国的确立'},
+    {name:'绗簩璇?鍙湁绀句細涓讳箟鎵嶈兘鏁戜腑鍥?, lessons:[
+      {name:'2.1 鏂版皯涓讳富涔夐潻鍛界殑鑳滃埄'},
+      {name:'2.2 绀句細涓讳箟鍒跺害鍦ㄤ腑鍥界殑纭珛'},
     ]},
-    {name:'第三课 只有中国特色社会主义才能发展中国', lessons:[
-      {name:'3.1 伟大的改革开放'},
-      {name:'3.2 中国特色社会主义的创立、发展和完善'},
+    {name:'绗笁璇?鍙湁涓浗鐗硅壊绀句細涓讳箟鎵嶈兘鍙戝睍涓浗', lessons:[
+      {name:'3.1 浼熷ぇ鐨勬敼闈╁紑鏀?},
+      {name:'3.2 涓浗鐗硅壊绀句細涓讳箟鐨勫垱绔嬨€佸彂灞曞拰瀹屽杽'},
     ]},
-    {name:'第四课 只有坚持和发展中国特色社会主义才能实现中华民族伟大复兴', lessons:[
-      {name:'4.1 中国特色社会主义进入新时代'},
-      {name:'4.2 实现中华民族伟大复兴的中国梦'},
+    {name:'绗洓璇?鍙湁鍧氭寔鍜屽彂灞曚腑鍥界壒鑹茬ぞ浼氫富涔夋墠鑳藉疄鐜颁腑鍗庢皯鏃忎紵澶у鍏?, lessons:[
+      {name:'4.1 涓浗鐗硅壊绀句細涓讳箟杩涘叆鏂版椂浠?},
+      {name:'4.2 瀹炵幇涓崕姘戞棌浼熷ぇ澶嶅叴鐨勪腑鍥芥ⅵ'},
     ]},
   ]},
-  {id:'b2', name:'必修2', fullName:'经济与社会', color:'#0F6E56', bg:'#E1F5EE',
+  {id:'b2', name:'蹇呬慨2', fullName:'缁忔祹涓庣ぞ浼?, color:'#0F6E56', bg:'#E1F5EE',
    chapters:[
-    {name:'第一课 我国的生产资料所有制', lessons:[
-      {name:'1.1 公有制为主体'},
-      {name:'1.2 多种所有制经济共同发展'},
+    {name:'绗竴璇?鎴戝浗鐨勭敓浜ц祫鏂欐墍鏈夊埗', lessons:[
+      {name:'1.1 鍏湁鍒朵负涓讳綋'},
+      {name:'1.2 澶氱鎵€鏈夊埗缁忔祹鍏卞悓鍙戝睍'},
     ]},
-    {name:'第二课 我国的社会主义市场经济体制', lessons:[
-      {name:'2.1 使市场在资源配置中起决定性作用'},
-      {name:'2.2 更好发挥政府作用'},
+    {name:'绗簩璇?鎴戝浗鐨勭ぞ浼氫富涔夊競鍦虹粡娴庝綋鍒?, lessons:[
+      {name:'2.1 浣垮競鍦哄湪璧勬簮閰嶇疆涓捣鍐冲畾鎬т綔鐢?},
+      {name:'2.2 鏇村ソ鍙戞尌鏀垮簻浣滅敤'},
     ]},
-    {name:'第三课 我国的经济发展', lessons:[
-      {name:'3.1 坚持新发展理念'},
-      {name:'3.2 建设现代化经济体系'},
+    {name:'绗笁璇?鎴戝浗鐨勭粡娴庡彂灞?, lessons:[
+      {name:'3.1 鍧氭寔鏂板彂灞曠悊蹇?},
+      {name:'3.2 寤鸿鐜颁唬鍖栫粡娴庝綋绯?},
     ]},
-    {name:'第四课 我国的个人收入分配与社会保障', lessons:[
-      {name:'4.1 我国的个人收入分配'},
-      {name:'4.2 我国的社会保障'},
+    {name:'绗洓璇?鎴戝浗鐨勪釜浜烘敹鍏ュ垎閰嶄笌绀句細淇濋殰', lessons:[
+      {name:'4.1 鎴戝浗鐨勪釜浜烘敹鍏ュ垎閰?},
+      {name:'4.2 鎴戝浗鐨勭ぞ浼氫繚闅?},
     ]},
   ]},
-  {id:'b3', name:'必修3', fullName:'政治与法治', color:'#BA7517', bg:'#FAEEDA',
+  {id:'b3', name:'蹇呬慨3', fullName:'鏀挎不涓庢硶娌?, color:'#BA7517', bg:'#FAEEDA',
    chapters:[
-    {name:'第一课 历史和人民的选择', lessons:[
-      {name:'1.1 中华人民共和国成立前各种政治力量'},
-      {name:'1.2 中国共产党领导的多党合作和政治协商制度'},
+    {name:'绗竴璇?鍘嗗彶鍜屼汉姘戠殑閫夋嫨', lessons:[
+      {name:'1.1 涓崕浜烘皯鍏卞拰鍥芥垚绔嬪墠鍚勭鏀挎不鍔涢噺'},
+      {name:'1.2 涓浗鍏变骇鍏氶瀵肩殑澶氬厷鍚堜綔鍜屾斂娌诲崗鍟嗗埗搴?},
     ]},
-    {name:'第二课 我国的社会主义民主政治', lessons:[
-      {name:'2.1 人民代表大会：我国的国家权力机关'},
-      {name:'2.2 人民代表大会制度：我国的根本政治制度'},
+    {name:'绗簩璇?鎴戝浗鐨勭ぞ浼氫富涔夋皯涓绘斂娌?, lessons:[
+      {name:'2.1 浜烘皯浠ｈ〃澶т細锛氭垜鍥界殑鍥藉鏉冨姏鏈哄叧'},
+      {name:'2.2 浜烘皯浠ｈ〃澶т細鍒跺害锛氭垜鍥界殑鏍规湰鏀挎不鍒跺害'},
     ]},
-    {name:'第三课 我国的国家机构', lessons:[
-      {name:'3.1 国家行政机关'},
-      {name:'3.2 国家司法机关'},
+    {name:'绗笁璇?鎴戝浗鐨勫浗瀹舵満鏋?, lessons:[
+      {name:'3.1 鍥藉琛屾斂鏈哄叧'},
+      {name:'3.2 鍥藉鍙告硶鏈哄叧'},
     ]},
-    {name:'第四课 我国的民族区域自治制度', lessons:[
-      {name:'4.1 民族区域自治制度'},
-      {name:'4.2 民族团结与国家统一'},
+    {name:'绗洓璇?鎴戝浗鐨勬皯鏃忓尯鍩熻嚜娌诲埗搴?, lessons:[
+      {name:'4.1 姘戞棌鍖哄煙鑷不鍒跺害'},
+      {name:'4.2 姘戞棌鍥㈢粨涓庡浗瀹剁粺涓€'},
     ]},
-    {name:'第五课 我国的基本政治制度', lessons:[
-      {name:'5.1 基层群众自治制度'},
-      {name:'5.2 中国共产党领导的多党合作制度'},
+    {name:'绗簲璇?鎴戝浗鐨勫熀鏈斂娌诲埗搴?, lessons:[
+      {name:'5.1 鍩哄眰缇や紬鑷不鍒跺害'},
+      {name:'5.2 涓浗鍏变骇鍏氶瀵肩殑澶氬厷鍚堜綔鍒跺害'},
     ]},
-    {name:'第六课 我国的法治建设', lessons:[
-      {name:'6.1 中国特色社会主义法治道路'},
-      {name:'6.2 全面依法治国的实践'},
+    {name:'绗叚璇?鎴戝浗鐨勬硶娌诲缓璁?, lessons:[
+      {name:'6.1 涓浗鐗硅壊绀句細涓讳箟娉曟不閬撹矾'},
+      {name:'6.2 鍏ㄩ潰渚濇硶娌诲浗鐨勫疄璺?},
     ]},
   ]},
-  {id:'b4', name:'必修4', fullName:'哲学与文化', color:'#534AB7', bg:'#EEEDFE',
+  {id:'b4', name:'蹇呬慨4', fullName:'鍝插涓庢枃鍖?, color:'#534AB7', bg:'#EEEDFE',
    chapters:[
-    {name:'第一单元 探索世界与把握规律', lessons:[
-      {name:'第一课 时代精神的精华'},
-      {name:'第二课 探究世界的本质'},
-      {name:'第三课 把握世界的规律'},
+    {name:'绗竴鍗曞厓 鎺㈢储涓栫晫涓庢妸鎻¤寰?, lessons:[
+      {name:'绗竴璇?鏃朵唬绮剧鐨勭簿鍗?},
+      {name:'绗簩璇?鎺㈢┒涓栫晫鐨勬湰璐?},
+      {name:'绗笁璇?鎶婃彙涓栫晫鐨勮寰?},
     ]},
-    {name:'第二单元 认识社会与价值选择', lessons:[
-      {name:'第四课 探索认识的奥秘'},
-      {name:'第五课 寻觅社会的真谛'},
-      {name:'第六课 实现人生的价值'},
+    {name:'绗簩鍗曞厓 璁よ瘑绀句細涓庝环鍊奸€夋嫨', lessons:[
+      {name:'绗洓璇?鎺㈢储璁よ瘑鐨勫ゥ绉?},
+      {name:'绗簲璇?瀵昏绀句細鐨勭湡璋?},
+      {name:'绗叚璇?瀹炵幇浜虹敓鐨勪环鍊?},
     ]},
-    {name:'第三单元 文化传承与文化创新', lessons:[
-      {name:'第七课 继承发展中华优秀传统文化'},
-      {name:'第八课 学习借鉴外来文化的有益成果'},
-      {name:'第九课 发展中国特色社会主义文化'},
+    {name:'绗笁鍗曞厓 鏂囧寲浼犳壙涓庢枃鍖栧垱鏂?, lessons:[
+      {name:'绗竷璇?缁ф壙鍙戝睍涓崕浼樼浼犵粺鏂囧寲'},
+      {name:'绗叓璇?瀛︿範鍊熼壌澶栨潵鏂囧寲鐨勬湁鐩婃垚鏋?},
+      {name:'绗節璇?鍙戝睍涓浗鐗硅壊绀句細涓讳箟鏂囧寲'},
     ]},
   ]},
-  {id:'b5', name:'选必1', fullName:'当代国际政治与经济', color:'#993C1D', bg:'#FAECE7',
+  {id:'b5', name:'閫夊繀1', fullName:'褰撲唬鍥介檯鏀挎不涓庣粡娴?, color:'#993C1D', bg:'#FAECE7',
    chapters:[
-    {name:'第一单元 各具特色的国家', lessons:[
-      {name:'第一课 国家的本质'},
-      {name:'第二课 国家的结构形式'},
+    {name:'绗竴鍗曞厓 鍚勫叿鐗硅壊鐨勫浗瀹?, lessons:[
+      {name:'绗竴璇?鍥藉鐨勬湰璐?},
+      {name:'绗簩璇?鍥藉鐨勭粨鏋勫舰寮?},
     ]},
-    {name:'第二单元 国际关系与全球治理', lessons:[
-      {name:'第三课 国家利益与外交政策'},
-      {name:'第四课 全球性问题与解决途径'},
+    {name:'绗簩鍗曞厓 鍥介檯鍏崇郴涓庡叏鐞冩不鐞?, lessons:[
+      {name:'绗笁璇?鍥藉鍒╃泭涓庡浜ゆ斂绛?},
+      {name:'绗洓璇?鍏ㄧ悆鎬ч棶棰樹笌瑙ｅ喅閫斿緞'},
     ]},
-    {name:'第三单元 经济全球化', lessons:[
-      {name:'第五课 国际经贸关系'},
-      {name:'第六课 国际经济竞争与合作'},
+    {name:'绗笁鍗曞厓 缁忔祹鍏ㄧ悆鍖?, lessons:[
+      {name:'绗簲璇?鍥介檯缁忚锤鍏崇郴'},
+      {name:'绗叚璇?鍥介檯缁忔祹绔炰簤涓庡悎浣?},
     ]},
   ]},
-  {id:'b6', name:'选必2', fullName:'法律与生活', color:'#1D9E75', bg:'#E1F5EE',
+  {id:'b6', name:'閫夊繀2', fullName:'娉曞緥涓庣敓娲?, color:'#1D9E75', bg:'#E1F5EE',
    chapters:[
-    {name:'第一单元 民事权利与义务', lessons:[
-      {name:'第一课 在生活中学民法用民法'},
-      {name:'第二课 家庭与婚姻'},
-      {name:'第三课 订立合同学问大'},
+    {name:'绗竴鍗曞厓 姘戜簨鏉冨埄涓庝箟鍔?, lessons:[
+      {name:'绗竴璇?鍦ㄧ敓娲讳腑瀛︽皯娉曠敤姘戞硶'},
+      {name:'绗簩璇?瀹跺涵涓庡濮?},
+      {name:'绗笁璇?璁㈢珛鍚堝悓瀛﹂棶澶?},
     ]},
-    {name:'第二单元 家庭与婚姻', lessons:[
-      {name:'第四课 侵权责任与权利维护'},
-      {name:'第五课 在社会生活中学法用法'},
+    {name:'绗簩鍗曞厓 瀹跺涵涓庡濮?, lessons:[
+      {name:'绗洓璇?渚垫潈璐ｄ换涓庢潈鍒╃淮鎶?},
+      {name:'绗簲璇?鍦ㄧぞ浼氱敓娲讳腑瀛︽硶鐢ㄦ硶'},
     ]},
-    {name:'第三单元 就业与创业', lessons:[
-      {name:'第六课 珍惜婚姻关系'},
-      {name:'第七课 维护消费者权益'},
+    {name:'绗笁鍗曞厓 灏变笟涓庡垱涓?, lessons:[
+      {name:'绗叚璇?鐝嶆儨濠氬Щ鍏崇郴'},
+      {name:'绗竷璇?缁存姢娑堣垂鑰呮潈鐩?},
     ]},
-    {name:'第四单元 社会争议解决', lessons:[
-      {name:'第八课 自觉遵守民法典'},
+    {name:'绗洓鍗曞厓 绀句細浜夎瑙ｅ喅', lessons:[
+      {name:'绗叓璇?鑷閬靛畧姘戞硶鍏?},
     ]},
   ]},
-  {id:'b7', name:'选必3', fullName:'逻辑与思维', color:'#3B6D11', bg:'#EAF3DE',
+  {id:'b7', name:'閫夊繀3', fullName:'閫昏緫涓庢€濈淮', color:'#3B6D11', bg:'#EAF3DE',
    chapters:[
-    {name:'第一单元 树立科学思维观念', lessons:[
-      {name:'第一课 走进思维世界'},
-      {name:'第二课 把握逻辑要义'},
+    {name:'绗竴鍗曞厓 鏍戠珛绉戝鎬濈淮瑙傚康', lessons:[
+      {name:'绗竴璇?璧拌繘鎬濈淮涓栫晫'},
+      {name:'绗簩璇?鎶婃彙閫昏緫瑕佷箟'},
     ]},
-    {name:'第二单元 遵循逻辑规则', lessons:[
-      {name:'第三课 运用判断'},
-      {name:'第四课 把握好推理'},
+    {name:'绗簩鍗曞厓 閬靛惊閫昏緫瑙勫垯', lessons:[
+      {name:'绗笁璇?杩愮敤鍒ゆ柇'},
+      {name:'绗洓璇?鎶婃彙濂芥帹鐞?},
     ]},
-    {name:'第三单元 运用辩证思维方法', lessons:[
-      {name:'第五课 辩证思维的含义与特征'},
-      {name:'第六课 在对立统一中把握事物'},
-      {name:'第七课 在批判性思维中探索新知'},
+    {name:'绗笁鍗曞厓 杩愮敤杈╄瘉鎬濈淮鏂规硶', lessons:[
+      {name:'绗簲璇?杈╄瘉鎬濈淮鐨勫惈涔変笌鐗瑰緛'},
+      {name:'绗叚璇?鍦ㄥ绔嬬粺涓€涓妸鎻′簨鐗?},
+      {name:'绗竷璇?鍦ㄦ壒鍒ゆ€ф€濈淮涓帰绱㈡柊鐭?},
     ]},
-    {name:'第四单元 提升创新思维能力', lessons:[
-      {name:'第八课 创新思维要善于联想'},
-      {name:'第九课 创新思维要多路探索'},
+    {name:'绗洓鍗曞厓 鎻愬崌鍒涙柊鎬濈淮鑳藉姏', lessons:[
+      {name:'绗叓璇?鍒涙柊鎬濈淮瑕佸杽浜庤仈鎯?},
+      {name:'绗節璇?鍒涙柊鎬濈淮瑕佸璺帰绱?},
     ]},
   ]},
 ];
@@ -1287,65 +1461,65 @@ function saveBooks(){
 const DEFAULT_QBANK = {
   b1:{
     before:[
-      {q:'新民主主义革命的性质是什么？',opts:['社会主义革命','民族民主革命','资产阶级革命','封建主义革命'],ans:1,
-       explain:'新民主主义革命是无产阶级领导的，以反对帝国主义、封建主义、官僚资本主义为目标的民族民主革命，属于世界无产阶级社会主义革命的一部分。',ability:'identify'},
-      {q:'马克思主义诞生的标志是什么？',opts:['《资本论》发表','《共产党宣言》发表','巴黎公社建立','第一国际成立'],ans:1,
-       explain:'1848年《共产党宣言》的发表，标志着马克思主义的诞生，为国际工人运动提供了理论指导。',ability:'reflect'},
-      {q:'中国共产党成立的时间是？',opts:['1919年','1920年','1921年','1922年'],ans:2,
-       explain:'1921年7月，中国共产党第一次全国代表大会在上海召开，中国共产党正式成立。',ability:'identify'},
+      {q:'鏂版皯涓讳富涔夐潻鍛界殑鎬ц川鏄粈涔堬紵',opts:['绀句細涓讳箟闈╁懡','姘戞棌姘戜富闈╁懡','璧勪骇闃剁骇闈╁懡','灏佸缓涓讳箟闈╁懡'],ans:1,
+       explain:'鏂版皯涓讳富涔夐潻鍛芥槸鏃犱骇闃剁骇棰嗗鐨勶紝浠ュ弽瀵瑰笣鍥戒富涔夈€佸皝寤轰富涔夈€佸畼鍍氳祫鏈富涔変负鐩爣鐨勬皯鏃忔皯涓婚潻鍛斤紝灞炰簬涓栫晫鏃犱骇闃剁骇绀句細涓讳箟闈╁懡鐨勪竴閮ㄥ垎銆?,ability:'identify'},
+      {q:'椹厠鎬濅富涔夎癁鐢熺殑鏍囧織鏄粈涔堬紵',opts:['銆婅祫鏈銆嬪彂琛?,'銆婂叡浜у厷瀹ｈ█銆嬪彂琛?,'宸撮粠鍏ぞ寤虹珛','绗竴鍥介檯鎴愮珛'],ans:1,
+       explain:'1848骞淬€婂叡浜у厷瀹ｈ█銆嬬殑鍙戣〃锛屾爣蹇楃潃椹厠鎬濅富涔夌殑璇炵敓锛屼负鍥介檯宸ヤ汉杩愬姩鎻愪緵浜嗙悊璁烘寚瀵笺€?,ability:'reflect'},
+      {q:'涓浗鍏变骇鍏氭垚绔嬬殑鏃堕棿鏄紵',opts:['1919骞?,'1920骞?,'1921骞?,'1922骞?],ans:2,
+       explain:'1921骞?鏈堬紝涓浗鍏变骇鍏氱涓€娆″叏鍥戒唬琛ㄥぇ浼氬湪涓婃捣鍙紑锛屼腑鍥藉叡浜у厷姝ｅ紡鎴愮珛銆?,ability:'identify'},
     ],
     during:[
-      {q:'下列关于中国特色社会主义的说法正确的是？',
-       opts:['照搬苏联模式','是马克思主义中国化的最新成果','与社会主义原则无关','是封建思想的延续'],ans:1,
-       explain:'中国特色社会主义是把马克思主义基本原理同中国具体实际相结合的结果，是科学社会主义理论逻辑和中国社会发展历史逻辑的辩证统一。',ability:'inquire'},
-      {q:'改革开放开始于哪一年？',opts:['1976年','1978年','1980年','1982年'],ans:1,
-       explain:'1978年12月，党的十一届三中全会作出了改革开放的历史性决策，开启了中国特色社会主义建设新时期。',ability:'identify'},
+      {q:'涓嬪垪鍏充簬涓浗鐗硅壊绀句細涓讳箟鐨勮娉曟纭殑鏄紵',
+       opts:['鐓ф惉鑻忚仈妯″紡','鏄┈鍏嬫€濅富涔変腑鍥藉寲鐨勬渶鏂版垚鏋?,'涓庣ぞ浼氫富涔夊師鍒欐棤鍏?,'鏄皝寤烘€濇兂鐨勫欢缁?],ans:1,
+       explain:'涓浗鐗硅壊绀句細涓讳箟鏄妸椹厠鎬濅富涔夊熀鏈師鐞嗗悓涓浗鍏蜂綋瀹為檯鐩哥粨鍚堢殑缁撴灉锛屾槸绉戝绀句細涓讳箟鐞嗚閫昏緫鍜屼腑鍥界ぞ浼氬彂灞曞巻鍙查€昏緫鐨勮京璇佺粺涓€銆?,ability:'inquire'},
+      {q:'鏀归潻寮€鏀惧紑濮嬩簬鍝竴骞达紵',opts:['1976骞?,'1978骞?,'1980骞?,'1982骞?],ans:1,
+       explain:'1978骞?2鏈堬紝鍏氱殑鍗佷竴灞婁笁涓叏浼氫綔鍑轰簡鏀归潻寮€鏀剧殑鍘嗗彶鎬у喅绛栵紝寮€鍚簡涓浗鐗硅壊绀句細涓讳箟寤鸿鏂版椂鏈熴€?,ability:'identify'},
     ],
     after:[
-      {q:'【综合分析】请分析"只有中国共产党才能救中国"这一历史结论的依据（开放题）',open:true,ability:'reflect'},
-      {q:'新时代中国特色社会主义的主要矛盾是什么？',
-       opts:['人民日益增长的物质文化需要同落后的社会生产之间的矛盾',
-             '人民日益增长的美好生活需要和不平衡不充分的发展之间的矛盾',
-             '社会主义与资本主义之间的矛盾',
-             '生产力与生产关系之间的矛盾'],ans:1,
-       explain:'党的十九大报告指出，中国特色社会主义进入新时代，我国社会主要矛盾已经转化为人民日益增长的美好生活需要和不平衡不充分的发展之间的矛盾。',ability:'identify'},
+      {q:'銆愮患鍚堝垎鏋愩€戣鍒嗘瀽"鍙湁涓浗鍏变骇鍏氭墠鑳芥晳涓浗"杩欎竴鍘嗗彶缁撹鐨勪緷鎹紙寮€鏀鹃锛?,open:true,ability:'reflect'},
+      {q:'鏂版椂浠ｄ腑鍥界壒鑹茬ぞ浼氫富涔夌殑涓昏鐭涚浘鏄粈涔堬紵',
+       opts:['浜烘皯鏃ョ泭澧為暱鐨勭墿璐ㄦ枃鍖栭渶瑕佸悓钀藉悗鐨勭ぞ浼氱敓浜т箣闂寸殑鐭涚浘',
+             '浜烘皯鏃ョ泭澧為暱鐨勭編濂界敓娲婚渶瑕佸拰涓嶅钩琛′笉鍏呭垎鐨勫彂灞曚箣闂寸殑鐭涚浘',
+             '绀句細涓讳箟涓庤祫鏈富涔変箣闂寸殑鐭涚浘',
+             '鐢熶骇鍔涗笌鐢熶骇鍏崇郴涔嬮棿鐨勭煕鐩?],ans:1,
+       explain:'鍏氱殑鍗佷節澶ф姤鍛婃寚鍑猴紝涓浗鐗硅壊绀句細涓讳箟杩涘叆鏂版椂浠ｏ紝鎴戝浗绀句細涓昏鐭涚浘宸茬粡杞寲涓轰汉姘戞棩鐩婂闀跨殑缇庡ソ鐢熸椿闇€瑕佸拰涓嶅钩琛′笉鍏呭垎鐨勫彂灞曚箣闂寸殑鐭涚浘銆?,ability:'identify'},
     ],
   },
   b3:{
     before:[
-      {q:'人民代表大会制度是我国的什么制度？',opts:['基本政治制度','根本政治制度','基本经济制度','根本经济制度'],ans:1,
-       explain:'人民代表大会制度是我国的根本政治制度，是中国特色社会主义政治的重要组成部分，体现了人民当家作主的本质。',ability:'identify'},
-      {q:'我国宪法规定一切权力属于？',opts:['中国共产党','全国人民代表大会','人民','国务院'],ans:2,
-       explain:'我国宪法规定"中华人民共和国的一切权力属于人民"，这体现了社会主义民主的本质要求。',ability:'reason'},
+      {q:'浜烘皯浠ｈ〃澶т細鍒跺害鏄垜鍥界殑浠€涔堝埗搴︼紵',opts:['鍩烘湰鏀挎不鍒跺害','鏍规湰鏀挎不鍒跺害','鍩烘湰缁忔祹鍒跺害','鏍规湰缁忔祹鍒跺害'],ans:1,
+       explain:'浜烘皯浠ｈ〃澶т細鍒跺害鏄垜鍥界殑鏍规湰鏀挎不鍒跺害锛屾槸涓浗鐗硅壊绀句細涓讳箟鏀挎不鐨勯噸瑕佺粍鎴愰儴鍒嗭紝浣撶幇浜嗕汉姘戝綋瀹朵綔涓荤殑鏈川銆?,ability:'identify'},
+      {q:'鎴戝浗瀹硶瑙勫畾涓€鍒囨潈鍔涘睘浜庯紵',opts:['涓浗鍏变骇鍏?,'鍏ㄥ浗浜烘皯浠ｈ〃澶т細','浜烘皯','鍥藉姟闄?],ans:2,
+       explain:'鎴戝浗瀹硶瑙勫畾"涓崕浜烘皯鍏卞拰鍥界殑涓€鍒囨潈鍔涘睘浜庝汉姘?锛岃繖浣撶幇浜嗙ぞ浼氫富涔夋皯涓荤殑鏈川瑕佹眰銆?,ability:'reason'},
     ],
     during:[
-      {q:'基层群众自治制度的主要形式不包括？',
-       opts:['城市居民委员会','农村村民委员会','业主委员会','人民代表大会'],ans:3,
-       explain:'基层群众自治制度的主要形式包括城市居委会、农村村委会和企事业单位的职工代表大会。人民代表大会是我国的国家权力机关，不属于基层自治形式。',ability:'analyze'},
-      {q:'关于公民政治参与的说法，正确的是？',
-       opts:['公民可以不受限制地参与政治','公民参与政治应依法有序进行',
-             '只有人大代表才能参与政治','政治参与与普通公民无关'],ans:1,
-       explain:'公民的政治参与必须在宪法和法律范围内进行，依法有序参与是社会主义民主政治的内在要求，也是公民履行社会责任的体现。',ability:'analyze'},
+      {q:'鍩哄眰缇や紬鑷不鍒跺害鐨勪富瑕佸舰寮忎笉鍖呮嫭锛?,
+       opts:['鍩庡競灞呮皯濮斿憳浼?,'鍐滄潙鏉戞皯濮斿憳浼?,'涓氫富濮斿憳浼?,'浜烘皯浠ｈ〃澶т細'],ans:3,
+       explain:'鍩哄眰缇や紬鑷不鍒跺害鐨勪富瑕佸舰寮忓寘鎷煄甯傚眳濮斾細銆佸啘鏉戞潙濮斾細鍜屼紒浜嬩笟鍗曚綅鐨勮亴宸ヤ唬琛ㄥぇ浼氥€備汉姘戜唬琛ㄥぇ浼氭槸鎴戝浗鐨勫浗瀹舵潈鍔涙満鍏筹紝涓嶅睘浜庡熀灞傝嚜娌诲舰寮忋€?,ability:'analyze'},
+      {q:'鍏充簬鍏皯鏀挎不鍙備笌鐨勮娉曪紝姝ｇ‘鐨勬槸锛?,
+       opts:['鍏皯鍙互涓嶅彈闄愬埗鍦板弬涓庢斂娌?,'鍏皯鍙備笌鏀挎不搴斾緷娉曟湁搴忚繘琛?,
+             '鍙湁浜哄ぇ浠ｈ〃鎵嶈兘鍙備笌鏀挎不','鏀挎不鍙備笌涓庢櫘閫氬叕姘戞棤鍏?],ans:1,
+       explain:'鍏皯鐨勬斂娌诲弬涓庡繀椤诲湪瀹硶鍜屾硶寰嬭寖鍥村唴杩涜锛屼緷娉曟湁搴忓弬涓庢槸绀句細涓讳箟姘戜富鏀挎不鐨勫唴鍦ㄨ姹傦紝涔熸槸鍏皯灞ヨ绀句細璐ｄ换鐨勪綋鐜般€?,ability:'analyze'},
     ],
     after:[
-      {q:'【案例分析】请结合所学知识，分析公民如何通过合法途径参与国家政治生活（开放题）',open:true,ability:'analyze'},
+      {q:'銆愭渚嬪垎鏋愩€戣缁撳悎鎵€瀛︾煡璇嗭紝鍒嗘瀽鍏皯濡備綍閫氳繃鍚堟硶閫斿緞鍙備笌鍥藉鏀挎不鐢熸椿锛堝紑鏀鹃锛?,open:true,ability:'analyze'},
     ],
   },
   b4:{
     before:[
-      {q:'哲学的基本问题是什么？',opts:['物质与意识的关系问题','世界是否可知的问题','运动与静止的关系问题','个人与社会的关系问题'],ans:0,
-       explain:'哲学的基本问题是物质和意识的关系问题，它包含两个方面：一是物质和意识何者为第一性，二是思维能不能认识存在的问题。',ability:'identify'},
-      {q:'矛盾的两个基本属性是？',opts:['同一性和斗争性','运动性和静止性','绝对性和相对性','普遍性和特殊性'],ans:0,
-       explain:'矛盾即对立统一，矛盾的两个基本属性是同一性（对立双方相互依存、相互贯通）和斗争性（对立双方相互排斥）。',ability:'inquire'},
+      {q:'鍝插鐨勫熀鏈棶棰樻槸浠€涔堬紵',opts:['鐗╄川涓庢剰璇嗙殑鍏崇郴闂','涓栫晫鏄惁鍙煡鐨勯棶棰?,'杩愬姩涓庨潤姝㈢殑鍏崇郴闂','涓汉涓庣ぞ浼氱殑鍏崇郴闂'],ans:0,
+       explain:'鍝插鐨勫熀鏈棶棰樻槸鐗╄川鍜屾剰璇嗙殑鍏崇郴闂锛屽畠鍖呭惈涓や釜鏂归潰锛氫竴鏄墿璐ㄥ拰鎰忚瘑浣曡€呬负绗竴鎬э紝浜屾槸鎬濈淮鑳戒笉鑳借璇嗗瓨鍦ㄧ殑闂銆?,ability:'identify'},
+      {q:'鐭涚浘鐨勪袱涓熀鏈睘鎬ф槸锛?,opts:['鍚屼竴鎬у拰鏂椾簤鎬?,'杩愬姩鎬у拰闈欐鎬?,'缁濆鎬у拰鐩稿鎬?,'鏅亶鎬у拰鐗规畩鎬?],ans:0,
+       explain:'鐭涚浘鍗冲绔嬬粺涓€锛岀煕鐩剧殑涓や釜鍩烘湰灞炴€ф槸鍚屼竴鎬э紙瀵圭珛鍙屾柟鐩镐簰渚濆瓨銆佺浉浜掕疮閫氾級鍜屾枟浜夋€э紙瀵圭珛鍙屾柟鐩镐簰鎺掓枼锛夈€?,ability:'inquire'},
     ],
     during:[
-      {q:'关于价值观的说法，正确的是？',
-       opts:['价值观是纯主观的，没有对错之分','正确的价值观对人的行为具有导向作用',
-             '价值观对人的行为没有影响','只有少数人才有价值观'],ans:1,
-       explain:'价值观是人们对事物价值的总的看法和根本观点，正确的价值观对人们认识世界、改造世界的活动具有积极的导向作用。',ability:'reflect'},
+      {q:'鍏充簬浠峰€艰鐨勮娉曪紝姝ｇ‘鐨勬槸锛?,
+       opts:['浠峰€艰鏄函涓昏鐨勶紝娌℃湁瀵归敊涔嬪垎','姝ｇ‘鐨勪环鍊艰瀵逛汉鐨勮涓哄叿鏈夊鍚戜綔鐢?,
+             '浠峰€艰瀵逛汉鐨勮涓烘病鏈夊奖鍝?,'鍙湁灏戞暟浜烘墠鏈変环鍊艰'],ans:1,
+       explain:'浠峰€艰鏄汉浠浜嬬墿浠峰€肩殑鎬荤殑鐪嬫硶鍜屾牴鏈鐐癸紝姝ｇ‘鐨勪环鍊艰瀵逛汉浠璇嗕笘鐣屻€佹敼閫犱笘鐣岀殑娲诲姩鍏锋湁绉瀬鐨勫鍚戜綔鐢ㄣ€?,ability:'reflect'},
     ],
     after:[
-      {q:'【辩证分析】用矛盾分析法分析一个你身边的社会现象（开放题）',open:true,ability:'inquire'},
+      {q:'銆愯京璇佸垎鏋愩€戠敤鐭涚浘鍒嗘瀽娉曞垎鏋愪竴涓綘韬竟鐨勭ぞ浼氱幇璞★紙寮€鏀鹃锛?,open:true,ability:'inquire'},
     ],
   },
 };
@@ -1388,37 +1562,37 @@ function genQuestions(bookId, phase, lessonName) {
   // Default fallback
   return {
     before:[
-      {q:`关于《${lessonName}》学习前的自我评估：你对本课主题的了解程度？`,
-       opts:['完全不了解','有一点了解','基本了解','非常了解'],ans:1,
-       explain:'通过本课学习，你将系统掌握相关知识，建立完整的知识框架。',ability:'identify'},
-      {q:'学习本课知识，对理解社会现象的意义在于？',
-       opts:['没有直接关系','有助于增强分析与综合能力','仅供娱乐了解','只对考试有用'],ans:1,
-       explain:'学习思政知识有助于增强公民意识，提升分析与综合能力，培育学科核心素养。',ability:'analyze'},
+      {q:`鍏充簬銆?{lessonName}銆嬪涔犲墠鐨勮嚜鎴戣瘎浼帮細浣犲鏈涓婚鐨勪簡瑙ｇ▼搴︼紵`,
+       opts:['瀹屽叏涓嶄簡瑙?,'鏈変竴鐐逛簡瑙?,'鍩烘湰浜嗚В','闈炲父浜嗚В'],ans:1,
+       explain:'閫氳繃鏈瀛︿範锛屼綘灏嗙郴缁熸帉鎻＄浉鍏崇煡璇嗭紝寤虹珛瀹屾暣鐨勭煡璇嗘鏋躲€?,ability:'identify'},
+      {q:'瀛︿範鏈鐭ヨ瘑锛屽鐞嗚В绀句細鐜拌薄鐨勬剰涔夊湪浜庯紵',
+       opts:['娌℃湁鐩存帴鍏崇郴','鏈夊姪浜庡寮哄垎鏋愪笌缁煎悎鑳藉姏','浠呬緵濞变箰浜嗚В','鍙鑰冭瘯鏈夌敤'],ans:1,
+       explain:'瀛︿範鎬濇斂鐭ヨ瘑鏈夊姪浜庡寮哄叕姘戞剰璇嗭紝鎻愬崌鍒嗘瀽涓庣患鍚堣兘鍔涳紝鍩硅偛瀛︾鏍稿績绱犲吇銆?,ability:'analyze'},
     ],
     during:[
-      {q:'课堂学习中，你认为本课最重要的核心概念是什么方面的内容？',
-       opts:['制度建设','价值引领','实践方法','历史脉络'],ans:1,
-       explain:'本课的核心在于通过价值引领，帮助学生形成正确的政治认同和学科素养。',ability:'reflect'},
+      {q:'璇惧爞瀛︿範涓紝浣犺涓烘湰璇炬渶閲嶈鐨勬牳蹇冩蹇垫槸浠€涔堟柟闈㈢殑鍐呭锛?,
+       opts:['鍒跺害寤鸿','浠峰€煎紩棰?,'瀹炶返鏂规硶','鍘嗗彶鑴夌粶'],ans:1,
+       explain:'鏈鐨勬牳蹇冨湪浜庨€氳繃浠峰€煎紩棰嗭紝甯姪瀛︾敓褰㈡垚姝ｇ‘鐨勬斂娌昏鍚屽拰瀛︾绱犲吇銆?,ability:'reflect'},
     ],
     after:[
-      {q:'请结合本课所学，谈谈你对社会责任与公共参与的理解（开放题）',open:true,ability:'inquire'},
+      {q:'璇风粨鍚堟湰璇炬墍瀛︼紝璋堣皥浣犲绀句細璐ｄ换涓庡叕鍏卞弬涓庣殑鐞嗚В锛堝紑鏀鹃锛?,open:true,ability:'inquire'},
     ],
   }[ph] || [];
 }
 
 const ABILITIES = [
-  {key:'identify', name:'辨识与判断', color:'#185FA5', bg:'#E6F1FB'},
-  {key:'analyze', name:'分析与综合', color:'#0F6E56', bg:'#E1F5EE'},
-  {key:'reason', name:'推理与论证', color:'#BA7517', bg:'#FAEEDA'},
-  {key:'inquire', name:'探究与建构', color:'#993C1D', bg:'#FAECE7'},
-  {key:'reflect', name:'反思与评价', color:'#534AB7', bg:'#EEEDFE'},
+  {key:'identify', name:'杈ㄨ瘑涓庡垽鏂?, color:'#185FA5', bg:'#E6F1FB'},
+  {key:'analyze', name:'鍒嗘瀽涓庣患鍚?, color:'#0F6E56', bg:'#E1F5EE'},
+  {key:'reason', name:'鎺ㄧ悊涓庤璇?, color:'#BA7517', bg:'#FAEEDA'},
+  {key:'inquire', name:'鎺㈢┒涓庡缓鏋?, color:'#993C1D', bg:'#FAECE7'},
+  {key:'reflect', name:'鍙嶆€濅笌璇勪环', color:'#534AB7', bg:'#EEEDFE'},
 ];
 
 const COMPETENCIES = [
-  {key:'political', name:'政治认同', color:'#185FA5', bg:'#E6F1FB'},
-  {key:'scientific', name:'科学精神', color:'#0F6E56', bg:'#E1F5EE'},
-  {key:'legal', name:'法治意识', color:'#BA7517', bg:'#FAEEDA'},
-  {key:'participation', name:'公共参与', color:'#993C1D', bg:'#FAECE7'},
+  {key:'political', name:'鏀挎不璁ゅ悓', color:'#185FA5', bg:'#E6F1FB'},
+  {key:'scientific', name:'绉戝绮剧', color:'#0F6E56', bg:'#E1F5EE'},
+  {key:'legal', name:'娉曟不鎰忚瘑', color:'#BA7517', bg:'#FAEEDA'},
+  {key:'participation', name:'鍏叡鍙備笌', color:'#993C1D', bg:'#FAECE7'},
 ];
 
 // ================================================================
@@ -1442,7 +1616,7 @@ let editorState = {
   optCount: 4,
 };
 
-// Old→new ability key migration map
+// Old鈫抧ew ability key migration map
 const ABILITY_MIGRATION = {
   civic:'identify', critical:'reflect', participation:'analyze',
   legal:'reason', global:'inquire', dialectical:'inquire'
@@ -1519,6 +1693,7 @@ function backToRole(){
   }
   saveData();
   document.getElementById('teacherApp').style.display='none';
+  document.getElementById('adminApp').style.display='none';
   document.getElementById('studentApp').style.display='none';
   document.getElementById('roleScreen').style.display='flex';
   currentRole=null;
@@ -1538,8 +1713,7 @@ function initTeacherApp(){
   renderTeacherOverview();
   switchTeacherPage('t-overview');
 }
-// 加载教师管理的所有班级到下拉框
-async function loadTeacherClasses(){
+// 鍔犺浇鏁欏笀绠＄悊鐨勬墍鏈夌彮绾у埌涓嬫媺妗?async function loadTeacherClasses(){
   const sel = document.getElementById('teacherClassSelector');
   if(!sel || !db) return;
   try{
@@ -1556,17 +1730,17 @@ async function loadTeacherClasses(){
     sel.innerHTML = `<option>${currentClassCode}</option>`;
   }
 }
-// 切换班级
+// 鍒囨崲鐝骇
 async function switchTeacherClass(code){
   if(code===currentClassCode) return;
   currentClassCode = code;
-  // 更新 localStorage
+  // 鏇存柊 localStorage
   const last = JSON.parse(localStorage.getItem('szpj_lastlogin')||'{}');
   last.classCode = code;
   localStorage.setItem('szpj_lastlogin', JSON.stringify(last));
-  // 断开旧班级实时通道
+  // 鏂紑鏃х彮绾у疄鏃堕€氶亾
   if(realtimeChannel){ db.removeChannel(realtimeChannel); realtimeChannel = null; }
-  // 清空旧数据缓存，重新加载
+  // 娓呯┖鏃ф暟鎹紦瀛橈紝閲嶆柊鍔犺浇
   studentData = {};
   await loadCloudData();
   startRealtime();
@@ -1613,9 +1787,9 @@ function renderTeacherChapters(bi){
           <span class="chapter-name">${ch.name}</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
-          <button class="btn-success-sm" onclick="openAddLesson(${bi},${ci})">+ 课时</button>
-          <button class="btn-editor-red" style="padding:3px 8px;font-size:11px" onclick="deleteChapter(${bi},${ci})">删除章节</button>
-          <span class="chapter-arrow" onclick="toggleChapter('tch_${bi}_${ci}');event.stopPropagation()">▼</span>
+          <button class="btn-success-sm" onclick="openAddLesson(${bi},${ci})">+ 璇炬椂</button>
+          <button class="btn-editor-red" style="padding:3px 8px;font-size:11px" onclick="deleteChapter(${bi},${ci})">鍒犻櫎绔犺妭</button>
+          <span class="chapter-arrow" onclick="toggleChapter('tch_${bi}_${ci}');event.stopPropagation()">鈻?/span>
         </div>
       </div>
       <div class="chapter-body">
@@ -1624,15 +1798,15 @@ function renderTeacherChapters(bi){
             <span style="font-size:13px;color:var(--gray-700)">${l.name}</span>
             <div class="lesson-edit-actions">
               <div class="phase-btn" onclick='openManageQ("${book.id}","before","${l.name.replace(/'/g,"\\'")}",${bi},${ci},${li})'>
-                <span class="dot dot-before"></span>课前题目
+                <span class="dot dot-before"></span>璇惧墠棰樼洰
               </div>
               <div class="phase-btn" onclick='openManageQ("${book.id}","during","${l.name.replace(/'/g,"\\'")}",${bi},${ci},${li})'>
-                <span class="dot dot-during"></span>课中题目
+                <span class="dot dot-during"></span>璇句腑棰樼洰
               </div>
               <div class="phase-btn" onclick='openManageQ("${book.id}","after","${l.name.replace(/'/g,"\\'")}",${bi},${ci},${li})'>
-                <span class="dot dot-after"></span>课后题目
+                <span class="dot dot-after"></span>璇惧悗棰樼洰
               </div>
-              <button class="btn-danger-sm" onclick="deleteLesson(${bi},${ci},${li})">删除课时</button>
+              <button class="btn-danger-sm" onclick="deleteLesson(${bi},${ci},${li})">鍒犻櫎璇炬椂</button>
             </div>
           </div>
         `).join('')}
@@ -1644,7 +1818,7 @@ function renderStudentTable(){
   const names=Object.keys(studentData);
   if(!names.length){
     document.getElementById('studentTableBody').innerHTML=
-      '<tr><td colspan="7" style="text-align:center;color:var(--gray-400);padding:24px">暂无学生数据，请学生端完成测评后刷新</td></tr>';
+      '<tr><td colspan="7" style="text-align:center;color:var(--gray-400);padding:24px">鏆傛棤瀛︾敓鏁版嵁锛岃瀛︾敓绔畬鎴愭祴璇勫悗鍒锋柊</td></tr>';
     return;
   }
   document.getElementById('studentTableBody').innerHTML=names.map(n=>{
@@ -1661,17 +1835,17 @@ function renderStudentTable(){
     const scoreClass=v=>v>=85?'score-a':v>=70?'score-b':v>=55?'score-c':'score-d';
     return `<tr>
       <td><strong>${n}</strong></td>
-      <td><span class="score-pill ${scoreClass(avg(before))}">${avg(before)}分</span></td>
-      <td><span class="score-pill ${scoreClass(avg(during))}">${avg(during)}分</span></td>
-      <td><span class="score-pill ${scoreClass(avg(after))}">${avg(after)}分</span></td>
-      <td><span class="score-pill ${scoreClass(avgAbilityRound)}">${avgAbilityRound}分</span></td>
+      <td><span class="score-pill ${scoreClass(avg(before))}">${avg(before)}鍒?/span></td>
+      <td><span class="score-pill ${scoreClass(avg(during))}">${avg(during)}鍒?/span></td>
+      <td><span class="score-pill ${scoreClass(avg(after))}">${avg(after)}鍒?/span></td>
+      <td><span class="score-pill ${scoreClass(avgAbilityRound)}">${avgAbilityRound}鍒?/span></td>
       <td style="color:var(--green)">+${growth}%</td>
-      <td><button class="btn-sm" onclick="viewStudentDetail('${n}')">查看报告</button></td>
+      <td><button class="btn-sm" onclick="viewStudentDetail('${n}')">鏌ョ湅鎶ュ憡</button></td>
     </tr>`;
   }).join('');
 }
 function viewStudentDetail(name){
-  toast('切换到学生端查看 '+name+' 的详细报告');
+  toast('鍒囨崲鍒板鐢熺鏌ョ湅 '+name+' 鐨勮缁嗘姤鍛?);
 }
 function renderTeacherOverview(){
   // Heatmap
@@ -1693,14 +1867,14 @@ function renderTeacherOverview(){
   const fl=document.getElementById('focusStudentList');
   if(!fl)return;
   const names=Object.keys(studentData);
-  if(!names.length){fl.innerHTML='<p style="font-size:12px;color:var(--gray-400)">暂无学生数据</p>';return;}
+  if(!names.length){fl.innerHTML='<p style="font-size:12px;color:var(--gray-400)">鏆傛棤瀛︾敓鏁版嵁</p>';return;}
   fl.innerHTML=names.slice(0,5).map(n=>{
     const s=studentData[n];
     const avgAb=ABILITIES.reduce((sum2,a)=>sum2+(s.abilities?.[a.key]||40),0)/ABILITIES.length;
     const avgAbRound=Math.round(avgAb);
     const basAvg=s.baseline?ABILITIES.reduce((sum3,a)=>sum3+(s.baseline[a.key]||40),0)/ABILITIES.length:40;
     const growth=avgAbRound-Math.round(basAvg);
-    const icon=growth>5?'↑':growth<-3?'↓':'→';
+    const icon=growth>5?'鈫?:growth<-3?'鈫?:'鈫?;
     const col=growth>5?'var(--green)':growth<-3?'var(--coral)':'var(--amber)';
     return `<div class="progress-ring-wrap">
       <svg class="ring" viewBox="0 0 48 48">
@@ -1712,7 +1886,7 @@ function renderTeacherOverview(){
       </svg>
       <div class="ring-info">
         <div class="ring-name">${n}</div>
-        <div class="ring-detail" style="color:${col}">${icon} 关键能力均分 ${avgAbRound}分 (${growth>0?'+':''}${growth})</div>
+        <div class="ring-detail" style="color:${col}">${icon} 鍏抽敭鑳藉姏鍧囧垎 ${avgAbRound}鍒?(${growth>0?'+':''}${growth})</div>
       </div>
     </div>`;
   }).join('');
@@ -1727,8 +1901,8 @@ function renderClassReport(){
       data:{
         labels:ABILITIES.map(a=>a.name),
         datasets:[
-          {label:'期初基线',data:[40,38,36,40,38],backgroundColor:'rgba(53,162,235,.3)',borderColor:'rgba(53,162,235,.7)',borderWidth:1},
-          {label:'当前得分',data:[62,58,64,60,59],backgroundColor:'rgba(24,95,165,.6)',borderColor:'#185FA5',borderWidth:1},
+          {label:'鏈熷垵鍩虹嚎',data:[40,38,36,40,38],backgroundColor:'rgba(53,162,235,.3)',borderColor:'rgba(53,162,235,.7)',borderWidth:1},
+          {label:'褰撳墠寰楀垎',data:[62,58,64,60,59],backgroundColor:'rgba(24,95,165,.6)',borderColor:'#185FA5',borderWidth:1},
         ]
       },
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100}}}
@@ -1741,7 +1915,7 @@ function renderClassReport(){
       data:{
         labels:COMPETENCIES.map(c=>c.name),
         datasets:[{
-          label:'学科素养达成程度',
+          label:'瀛︾绱犲吇杈炬垚绋嬪害',
           data:[62,58,55,60],
           backgroundColor:'rgba(24,95,165,.18)',
           borderColor:'#185FA5',
@@ -1762,16 +1936,16 @@ function renderClassReport(){
   if(ta) ta.innerHTML=`
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="padding:12px;background:var(--blue-l);border-radius:var(--r-sm);border-left:3px solid var(--blue)">
-        <div style="font-size:13px;font-weight:500;color:var(--blue);margin-bottom:4px">政治参与能力（优先加强）</div>
-        <div style="font-size:12px;color:var(--gray-700);line-height:1.7">全班政治参与得分均值64分，高于基线24%，但仍有7名学生低于60分。建议在《政治与法治》教学中增加模拟听证、角色扮演等实践性活动，强化程序性知识的迁移运用。</div>
+        <div style="font-size:13px;font-weight:500;color:var(--blue);margin-bottom:4px">鏀挎不鍙備笌鑳藉姏锛堜紭鍏堝姞寮猴級</div>
+        <div style="font-size:12px;color:var(--gray-700);line-height:1.7">鍏ㄧ彮鏀挎不鍙備笌寰楀垎鍧囧€?4鍒嗭紝楂樹簬鍩虹嚎24%锛屼絾浠嶆湁7鍚嶅鐢熶綆浜?0鍒嗐€傚缓璁湪銆婃斂娌讳笌娉曟不銆嬫暀瀛︿腑澧炲姞妯℃嫙鍚瘉銆佽鑹叉壆婕旂瓑瀹炶返鎬ф椿鍔紝寮哄寲绋嬪簭鎬х煡璇嗙殑杩佺Щ杩愮敤銆?/div>
       </div>
       <div style="padding:12px;background:var(--green-l);border-radius:var(--r-sm);border-left:3px solid var(--green)">
-        <div style="font-size:13px;font-weight:500;color:var(--green);margin-bottom:4px">批判性思维（明显提升）</div>
-        <div style="font-size:12px;color:var(--gray-700);line-height:1.7">批判性思维维度增值最高（+52.6%），说明小组讨论和开放性问答效果显著。建议推广到其他模块，特别是哲学与文化单元的辩证分析。</div>
+        <div style="font-size:13px;font-weight:500;color:var(--green);margin-bottom:4px">鎵瑰垽鎬ф€濈淮锛堟槑鏄炬彁鍗囷級</div>
+        <div style="font-size:12px;color:var(--gray-700);line-height:1.7">鎵瑰垽鎬ф€濈淮缁村害澧炲€兼渶楂橈紙+52.6%锛夛紝璇存槑灏忕粍璁ㄨ鍜屽紑鏀炬€ч棶绛旀晥鏋滄樉钁椼€傚缓璁帹骞垮埌鍏朵粬妯″潡锛岀壒鍒槸鍝插涓庢枃鍖栧崟鍏冪殑杈╄瘉鍒嗘瀽銆?/div>
       </div>
       <div style="padding:12px;background:var(--amber-l);border-radius:var(--r-sm);border-left:3px solid var(--amber)">
-        <div style="font-size:13px;font-weight:500;color:var(--amber);margin-bottom:4px">国际视野（需要强化）</div>
-        <div style="font-size:12px;color:var(--gray-700);line-height:1.7">国际视野是6项能力中均分最低的（55分），与《当代国际政治与经济》教学进度有关。建议引入时事热点分析，结合当代国际局势讲授全球治理内容。</div>
+        <div style="font-size:13px;font-weight:500;color:var(--amber);margin-bottom:4px">鍥介檯瑙嗛噹锛堥渶瑕佸己鍖栵級</div>
+        <div style="font-size:12px;color:var(--gray-700);line-height:1.7">鍥介檯瑙嗛噹鏄?椤硅兘鍔涗腑鍧囧垎鏈€浣庣殑锛?5鍒嗭級锛屼笌銆婂綋浠ｅ浗闄呮斂娌讳笌缁忔祹銆嬫暀瀛﹁繘搴︽湁鍏炽€傚缓璁紩鍏ユ椂浜嬬儹鐐瑰垎鏋愶紝缁撳悎褰撲唬鍥介檯灞€鍔胯鎺堝叏鐞冩不鐞嗗唴瀹广€?/div>
       </div>
     </div>`;
 
@@ -1784,8 +1958,8 @@ function renderClassReport(){
       data:{
         labels:ABILITIES.map(a=>a.name),
         datasets:[
-          {label:'班级当前',data:[62,58,64,60,55,59],borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.15)',borderWidth:2,pointBackgroundColor:'#185FA5'},
-          {label:'期初基线',data:[40,38,36,40,35,38],borderColor:'#D3D1C7',backgroundColor:'rgba(0,0,0,.03)',borderWidth:1,pointBackgroundColor:'#D3D1C7'},
+          {label:'鐝骇褰撳墠',data:[62,58,64,60,55,59],borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.15)',borderWidth:2,pointBackgroundColor:'#185FA5'},
+          {label:'鏈熷垵鍩虹嚎',data:[40,38,36,40,35,38],borderColor:'#D3D1C7',backgroundColor:'rgba(0,0,0,.03)',borderWidth:1,pointBackgroundColor:'#D3D1C7'},
         ]
       },
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:'rgba(0,0,0,.06)'},pointLabels:{font:{size:11}}}}}
@@ -1807,7 +1981,7 @@ function openEditorModal(id){
 // --- Book management ---
 function openAddBook(){
   editorState.mode='addBook'; editorState.bookIdx=-1;
-  document.getElementById('editorBookTitle').textContent='新增教材';
+  document.getElementById('editorBookTitle').textContent='鏂板鏁欐潗';
   document.getElementById('eb_name').value='';
   document.getElementById('eb_fullName').value='';
   document.getElementById('eb_color').value='#185FA5';
@@ -1817,7 +1991,7 @@ function openAddBook(){
 function saveBook(){
   const name=document.getElementById('eb_name').value.trim();
   const fullName=document.getElementById('eb_fullName').value.trim();
-  if(!name||!fullName){toast('请填写教材简称和全名');return;}
+  if(!name||!fullName){toast('璇峰～鍐欐暀鏉愮畝绉板拰鍏ㄥ悕');return;}
   const color=document.getElementById('eb_color').value;
   const bg=document.getElementById('eb_bg').value;
   // Generate unique id
@@ -1828,69 +2002,69 @@ function saveBook(){
   closeEditorModal('editorBookModal');
   renderTeacherBookTabs();
   selectTeacherBook(BOOKS.length-1);
-  toast(`教材《${name} ${fullName}》已添加`);
+  toast(`鏁欐潗銆?{name} ${fullName}銆嬪凡娣诲姞`);
 }
 function deleteCurrentBook(){
-  if(BOOKS.length<=1){toast('至少保留一本教材');return;}
+  if(BOOKS.length<=1){toast('鑷冲皯淇濈暀涓€鏈暀鏉?);return;}
   const book=BOOKS[currentBookIdx];
-  if(!confirm(`确认删除教材《${book.name} ${book.fullName}》？此操作不可撤销。`))return;
+  if(!confirm(`纭鍒犻櫎鏁欐潗銆?{book.name} ${book.fullName}銆嬶紵姝ゆ搷浣滀笉鍙挙閿€銆俙))return;
   BOOKS.splice(currentBookIdx,1);
   saveBooks();
   const newIdx=Math.max(0,currentBookIdx-1);
   currentBookIdx=newIdx;
   renderTeacherBookTabs();
   selectTeacherBook(newIdx);
-  toast('教材已删除');
+  toast('鏁欐潗宸插垹闄?);
 }
 
 // --- Chapter management ---
 function openAddChapter(){
   editorState.bookIdx=currentBookIdx;
-  document.getElementById('editorChapterTitle').textContent='新增章节';
+  document.getElementById('editorChapterTitle').textContent='鏂板绔犺妭';
   document.getElementById('ec_name').value='';
   openEditorModal('editorChapterModal');
 }
 function saveChapter(){
   const name=document.getElementById('ec_name').value.trim();
-  if(!name){toast('请填写章节名称');return;}
+  if(!name){toast('璇峰～鍐欑珷鑺傚悕绉?);return;}
   BOOKS[editorState.bookIdx].chapters.push({name, lessons:[]});
   saveBooks();
   closeEditorModal('editorChapterModal');
   renderTeacherChapters(editorState.bookIdx);
-  toast('章节已添加');
+  toast('绔犺妭宸叉坊鍔?);
 }
 function deleteChapter(bi,ci){
   const ch=BOOKS[bi].chapters[ci];
-  if(!confirm(`确认删除章节《${ch.name}》？其下所有课时将同时删除。`))return;
+  if(!confirm(`纭鍒犻櫎绔犺妭銆?{ch.name}銆嬶紵鍏朵笅鎵€鏈夎鏃跺皢鍚屾椂鍒犻櫎銆俙))return;
   BOOKS[bi].chapters.splice(ci,1);
   saveBooks();
   renderTeacherChapters(bi);
-  toast('章节已删除');
+  toast('绔犺妭宸插垹闄?);
 }
 
 // --- Lesson management ---
 function openAddLesson(bi,ci){
   editorState.bookIdx=bi; editorState.chIdx=ci;
-  document.getElementById('editorLessonTitle').textContent='新增课时';
+  document.getElementById('editorLessonTitle').textContent='鏂板璇炬椂';
   document.getElementById('el_name').value='';
   openEditorModal('editorLessonModal');
 }
 function saveLesson(){
   const name=document.getElementById('el_name').value.trim();
-  if(!name){toast('请填写课时名称');return;}
+  if(!name){toast('璇峰～鍐欒鏃跺悕绉?);return;}
   BOOKS[editorState.bookIdx].chapters[editorState.chIdx].lessons.push({name});
   saveBooks();
   closeEditorModal('editorLessonModal');
   renderTeacherChapters(editorState.bookIdx);
-  toast('课时已添加');
+  toast('璇炬椂宸叉坊鍔?);
 }
 function deleteLesson(bi,ci,li){
   const les=BOOKS[bi].chapters[ci].lessons[li];
-  if(!confirm(`确认删除课时《${les.name}》？`))return;
+  if(!confirm(`纭鍒犻櫎璇炬椂銆?{les.name}銆嬶紵`))return;
   BOOKS[bi].chapters[ci].lessons.splice(li,1);
   saveBooks();
   renderTeacherChapters(bi);
-  toast('课时已删除');
+  toast('璇炬椂宸插垹闄?);
 }
 
 // --- Question management ---
@@ -1898,8 +2072,8 @@ function openManageQ(bookId, phase, lessonName, bi, ci, li){
   editorState.bookIdx=bi; editorState.chIdx=ci; editorState.lesIdx=li;
   editorState.qPhase=phase; editorState.qBookId=bookId;
   editorState.newQType='mcq'; editorState.optCount=4;
-  const phaseNames={before:'课前测试',during:'课中任务',after:'课后作业'};
-  document.getElementById('editorQTitle').textContent=`${phaseNames[phase]} · 题目管理`;
+  const phaseNames={before:'璇惧墠娴嬭瘯',during:'璇句腑浠诲姟',after:'璇惧悗浣滀笟'};
+  document.getElementById('editorQTitle').textContent=`${phaseNames[phase]} 路 棰樼洰绠＄悊`;
   document.getElementById('editorQSubtitle').textContent=lessonName;
   renderQList(bookId, phase);
   resetQForm();
@@ -1910,28 +2084,28 @@ function openManageQ(bookId, phase, lessonName, bi, ci, li){
 function renderQList(bookId, phase){
   const pool=(QBANK[bookId]||{})[phase]||[];
   const c=document.getElementById('editorQList');
-  const phaseNames={before:'课前测试',during:'课中任务',after:'课后作业'};
+  const phaseNames={before:'璇惧墠娴嬭瘯',during:'璇句腑浠诲姟',after:'璇惧悗浣滀笟'};
   if(!pool.length){
-    c.innerHTML=`<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px">暂无题目，请在下方添加</div>`;
+    c.innerHTML=`<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px">鏆傛棤棰樼洰锛岃鍦ㄤ笅鏂规坊鍔?/div>`;
     return;
   }
-  c.innerHTML=`<div class="editor-section-title">📋 当前${phaseNames[phase]}题目（共${pool.length}题）</div>`+
+  c.innerHTML=`<div class="editor-section-title">馃搵 褰撳墠${phaseNames[phase]}棰樼洰锛堝叡${pool.length}棰橈級</div>`+
   pool.map((q,i)=>`
     <div class="q-item">
       <div class="q-item-head">
         <div style="display:flex;align-items:center;gap:8px">
-          <span class="q-badge ${q.open?'q-badge-open':'q-badge-mcq'}">${q.open?'开放题':'选择题'}</span>
-          <span style="font-size:12px;color:var(--gray-400)">第${i+1}题</span>
-          ${q.ability?`<span style="font-size:11px;color:var(--gray-600)">· ${ABILITIES.find(a=>a.key===q.ability)?.name||q.ability}</span>`:''}
+          <span class="q-badge ${q.open?'q-badge-open':'q-badge-mcq'}">${q.open?'寮€鏀鹃':'閫夋嫨棰?}</span>
+          <span style="font-size:12px;color:var(--gray-400)">绗?{i+1}棰?/span>
+          ${q.ability?`<span style="font-size:11px;color:var(--gray-600)">路 ${ABILITIES.find(a=>a.key===q.ability)?.name||q.ability}</span>`:''}
         </div>
-        <button class="btn-danger-sm" onclick="deleteQuestion('${bookId}','${phase}',${i})">删除</button>
+        <button class="btn-danger-sm" onclick="deleteQuestion('${bookId}','${phase}',${i})">鍒犻櫎</button>
       </div>
       <div style="font-size:13px;color:var(--gray-900);line-height:1.6;margin-bottom:${!q.open?'8px':'0'}">${q.q}</div>
       ${!q.open&&q.opts?`<div style="display:flex;flex-wrap:wrap;gap:6px;font-size:12px">`+q.opts.map((o,oi)=>`
         <span style="padding:2px 8px;border-radius:8px;background:${oi===q.ans?'var(--green-l)':'var(--gray-100)'};color:${oi===q.ans?'var(--green)':'var(--gray-600)'}">
-          ${String.fromCharCode(65+oi)}. ${o}${oi===q.ans?' ✓':''}
+          ${String.fromCharCode(65+oi)}. ${o}${oi===q.ans?' 鉁?:''}
         </span>`).join('')+`</div>`:''}
-      ${q.explain?`<div style="margin-top:6px;font-size:11px;color:var(--gray-600);background:var(--amber-l);padding:6px 10px;border-radius:6px">解析：${q.explain}</div>`:''}
+      ${q.explain?`<div style="margin-top:6px;font-size:11px;color:var(--gray-600);background:var(--amber-l);padding:6px 10px;border-radius:6px">瑙ｆ瀽锛?{q.explain}</div>`:''}
     </div>
   `).join('');
 }
@@ -1942,7 +2116,7 @@ function deleteQuestion(bookId, phase, idx){
   QBANK[bookId][phase].splice(idx,1);
   saveQBank();
   renderQList(bookId, phase);
-  toast('题目已删除');
+  toast('棰樼洰宸插垹闄?);
 }
 
 function switchQType(type){
@@ -1969,18 +2143,18 @@ function rebuildOptInputs(){
   list.innerHTML=Array.from({length:editorState.optCount},(_, i)=>`
     <div class="opt-input-row" id="optrow_${i}">
       <input type="radio" name="nq_correct" class="radio-correct" value="${i}" ${i===0?'checked':''}>
-      <input class="editor-input" placeholder="选项${labels[i]}" id="nq_opt${i}">
-      <button class="btn-danger-sm" onclick="removeOpt(${i})">删除</button>
+      <input class="editor-input" placeholder="閫夐」${labels[i]}" id="nq_opt${i}">
+      <button class="btn-danger-sm" onclick="removeOpt(${i})">鍒犻櫎</button>
     </div>`).join('');
 }
 
 function addOpt(){
-  if(editorState.optCount>=6){toast('最多6个选项');return;}
+  if(editorState.optCount>=6){toast('鏈€澶?涓€夐」');return;}
   editorState.optCount++;
   rebuildOptInputs();
 }
 function removeOpt(idx){
-  if(editorState.optCount<=2){toast('至少保留2个选项');return;}
+  if(editorState.optCount<=2){toast('鑷冲皯淇濈暀2涓€夐」');return;}
   // read current values
   const vals=[];
   for(let i=0;i<editorState.optCount;i++){
@@ -2005,7 +2179,7 @@ function selectAbilityTag(key){
 
 function addQuestion(){
   const qText=document.getElementById('nq_text').value.trim();
-  if(!qText){toast('请填写题目内容');return;}
+  if(!qText){toast('璇峰～鍐欓鐩唴瀹?);return;}
   const ability=document.querySelector('#nq_ability_tags .tag-chip.sel')?.id?.replace('abtag_','')||'identify';
   const bookId=editorState.qBookId;
   const phase=editorState.qPhase;
@@ -2019,7 +2193,7 @@ function addQuestion(){
     const opts=[];
     for(let i=0;i<editorState.optCount;i++){
       const v=(document.getElementById('nq_opt'+i)?.value||'').trim();
-      if(!v){toast(`选项${String.fromCharCode(65+i)}不能为空`);return;}
+      if(!v){toast(`閫夐」${String.fromCharCode(65+i)}涓嶈兘涓虹┖`);return;}
       opts.push(v);
     }
     const ansEl=document.querySelector('input[name="nq_correct"]:checked');
@@ -2035,7 +2209,7 @@ function addQuestion(){
   document.getElementById('nq_explain').value='';
   rebuildOptInputs();
   document.querySelectorAll('#nq_ability_tags .tag-chip').forEach(el=>el.classList.remove('sel'));
-  toast('题目已添加');
+  toast('棰樼洰宸叉坊鍔?);
 }
 
 function exportData(){
@@ -2044,7 +2218,7 @@ function exportData(){
   a.href=URL.createObjectURL(blob);
   a.download='szpj_data_'+new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')+'.json';
   a.click();
-  toast('数据已导出');
+  toast('鏁版嵁宸插鍑?);
 }
 
 // ================================================================
@@ -2058,13 +2232,13 @@ function initStudentApp(){
     <div class="profile-header">
       <div class="profile-avatar">${initial}</div>
       <div>
-        <div class="profile-name">${currentStudentName}同学</div>
-        <div class="profile-sub">金华外国语学校 · 高中思政 · 学科素养增值追踪</div>
+        <div class="profile-name">${currentStudentName}鍚屽</div>
+        <div class="profile-sub">閲戝崕澶栧浗璇鏍?路 楂樹腑鎬濇斂 路 瀛︾绱犲吇澧炲€艰拷韪?/div>
         <div class="profile-chips">
-          <span class="chip chip-blue">政治认同 ${s.competencies.political}</span>
-          <span class="chip chip-green">科学精神 ${s.competencies.scientific}</span>
-          <span class="chip" style="background:var(--amber-l);color:var(--amber)">法治意识 ${s.competencies.legal}</span>
-          <span class="chip" style="background:var(--purple-l);color:var(--purple)">公共参与 ${s.competencies.participation}</span>
+          <span class="chip chip-blue">鏀挎不璁ゅ悓 ${s.competencies.political}</span>
+          <span class="chip chip-green">绉戝绮剧 ${s.competencies.scientific}</span>
+          <span class="chip" style="background:var(--amber-l);color:var(--amber)">娉曟不鎰忚瘑 ${s.competencies.legal}</span>
+          <span class="chip" style="background:var(--purple-l);color:var(--purple)">鍏叡鍙備笌 ${s.competencies.participation}</span>
         </div>
       </div>
     </div>`;
@@ -2111,7 +2285,7 @@ function renderStudentChapters(bi){
           <div class="chapter-icon" style="background:${book.bg};color:${book.color};font-weight:500">${ci+1}</div>
           <span class="chapter-name">${ch.name}</span>
         </div>
-        <span class="chapter-arrow">▼</span>
+        <span class="chapter-arrow">鈻?/span>
       </div>
       <div class="chapter-body">
         ${ch.lessons.map((l,li)=>{
@@ -2125,16 +2299,16 @@ function renderStudentChapters(bi){
             <div style="font-size:13px;color:var(--gray-700);margin-bottom:8px;font-weight:500">${l.name}</div>
             <div class="phase-btns">
               <div class="phase-btn ${doneB?'done':''}" onclick="openQuiz('${book.id}',${ci},${li},'before','${l.name}')">
-                <span class="dot dot-before"></span>${doneB?'已完成':'课前测试'}
-                ${doneB?`<span style="font-size:10px;color:var(--green)">${s.scores[keyBefore]}分</span>`:''}
+                <span class="dot dot-before"></span>${doneB?'宸插畬鎴?:'璇惧墠娴嬭瘯'}
+                ${doneB?`<span style="font-size:10px;color:var(--green)">${s.scores[keyBefore]}鍒?/span>`:''}
               </div>
               <div class="phase-btn ${doneD?'done':''}" onclick="openQuiz('${book.id}',${ci},${li},'during','${l.name}')">
-                <span class="dot dot-during"></span>${doneD?'已完成':'课中任务'}
-                ${doneD?`<span style="font-size:10px;color:var(--green)">${s.scores[keyDuring]}分</span>`:''}
+                <span class="dot dot-during"></span>${doneD?'宸插畬鎴?:'璇句腑浠诲姟'}
+                ${doneD?`<span style="font-size:10px;color:var(--green)">${s.scores[keyDuring]}鍒?/span>`:''}
               </div>
               <div class="phase-btn ${doneA?'done':''}" onclick="openQuiz('${book.id}',${ci},${li},'after','${l.name}')">
-                <span class="dot dot-after"></span>${doneA?'已完成':'课后作业'}
-                ${doneA?`<span style="font-size:10px;color:var(--green)">${s.scores[keyAfter]}分</span>`:''}
+                <span class="dot dot-after"></span>${doneA?'宸插畬鎴?:'璇惧悗浣滀笟'}
+                ${doneA?`<span style="font-size:10px;color:var(--green)">${s.scores[keyAfter]}鍒?/span>`:''}
               </div>
             </div>
           </div>`;
@@ -2148,7 +2322,7 @@ function renderStudentChapters(bi){
 // QUIZ ENGINE
 // ================================================================
 function openQuiz(bookId, chIdx, lesIdx, phase, lessonName){
-  const phaseNames={before:'课前测试',during:'课中任务小测',after:'课后作业'};
+  const phaseNames={before:'璇惧墠娴嬭瘯',during:'璇句腑浠诲姟灏忔祴',after:'璇惧悗浣滀笟'};
   const phaseColors={before:'#FAEEDA',during:'#E6F1FB',after:'#EEEDFE'};
   const phaseTxtColors={before:'#BA7517',during:'#185FA5',after:'#534AB7'};
   quizState={
@@ -2158,7 +2332,7 @@ function openQuiz(bookId, chIdx, lesIdx, phase, lessonName){
     phaseColor: phaseColors[phase], phaseTxtColor: phaseTxtColors[phase],
     phaseName: phaseNames[phase]
   };
-  document.getElementById('quizModalTitle').textContent=`${phaseNames[phase]} · ${lessonName}`;
+  document.getElementById('quizModalTitle').textContent=`${phaseNames[phase]} 路 ${lessonName}`;
   renderQuizQuestion();
   document.getElementById('quizModal').classList.add('open');
 }
@@ -2171,21 +2345,21 @@ function renderQuizQuestion(){
   if(q.open){
     document.getElementById('quizBody').innerHTML=`
       <div class="quiz-phase-tag" style="background:${phaseColor};color:${phaseTxtColor}">${phaseName}</div>
-      <div class="quiz-q-num">第 ${current+1}/${questions.length} 题 · 开放作答</div>
+      <div class="quiz-q-num">绗?${current+1}/${questions.length} 棰?路 寮€鏀句綔绛?/div>
       <div class="quiz-question">${q.q}</div>
-      <textarea class="task-textarea" id="openAnswer" placeholder="请在此输入你的分析与思考（200字以上）...">${quizState.openAnswers[current]||''}</textarea>
-      <div class="task-hint">提示：结合课本知识，从多角度展开分析，体现公共参与意识</div>
+      <textarea class="task-textarea" id="openAnswer" placeholder="璇峰湪姝よ緭鍏ヤ綘鐨勫垎鏋愪笌鎬濊€冿紙200瀛椾互涓婏級...">${quizState.openAnswers[current]||''}</textarea>
+      <div class="task-hint">鎻愮ず锛氱粨鍚堣鏈煡璇嗭紝浠庡瑙掑害灞曞紑鍒嗘瀽锛屼綋鐜板叕鍏卞弬涓庢剰璇?/div>
       <div class="quiz-nav">
-        <button class="btn-ghost" onclick="prevQuestion()">上一题</button>
+        <button class="btn-ghost" onclick="prevQuestion()">涓婁竴棰?/button>
         <button class="btn-primary" onclick="submitOpenAnswer()">
-          ${current===questions.length-1?'提交并查看结果':'保存并继续'}
+          ${current===questions.length-1?'鎻愪氦骞舵煡鐪嬬粨鏋?:'淇濆瓨骞剁户缁?}
         </button>
       </div>`;
   } else {
     const selectedIdx=quizState.answers[current];
     document.getElementById('quizBody').innerHTML=`
       <div class="quiz-phase-tag" style="background:${phaseColor};color:${phaseTxtColor}">${phaseName}</div>
-      <div class="quiz-q-num">第 ${current+1}/${questions.length} 题</div>
+      <div class="quiz-q-num">绗?${current+1}/${questions.length} 棰?/div>
       <div class="quiz-question">${q.q}</div>
       <div class="quiz-options">
         ${q.opts.map((o,i)=>`
@@ -2196,10 +2370,10 @@ function renderQuizQuestion(){
       </div>
       <div class="quiz-explain" id="quizExplain">${q.explain||''}</div>
       <div class="quiz-nav">
-        <button class="btn-ghost" onclick="prevQuestion()">上一题</button>
+        <button class="btn-ghost" onclick="prevQuestion()">涓婁竴棰?/button>
         <button class="btn-primary" id="quizNextBtn"
           onclick="${selectedIdx!==undefined?current===quizState.questions.length-1?'finishQuiz()':'nextQuestion()':'checkAnswer()'}"
-        >${selectedIdx!==undefined?(current===quizState.questions.length-1?'提交测试':'下一题'):'确认答案'}</button>
+        >${selectedIdx!==undefined?(current===quizState.questions.length-1?'鎻愪氦娴嬭瘯':'涓嬩竴棰?):'纭绛旀'}</button>
       </div>`;
   }
 }
@@ -2210,7 +2384,7 @@ function selectOpt(i){
 }
 function checkAnswer(){
   const {questions,current,answers}=quizState;
-  if(answers[current]===undefined){toast('请先选择答案');return;}
+  if(answers[current]===undefined){toast('璇峰厛閫夋嫨绛旀');return;}
   const q=questions[current];
   document.querySelectorAll('.quiz-option').forEach((el,i)=>{
     el.classList.remove('selected');
@@ -2220,7 +2394,7 @@ function checkAnswer(){
   document.getElementById('quizExplain').classList.add('show');
   const nb=document.getElementById('quizNextBtn');
   if(nb) nb.onclick=current===quizState.questions.length-1?finishQuiz:nextQuestion;
-  if(nb) nb.textContent=current===quizState.questions.length-1?'提交测试':'下一题';
+  if(nb) nb.textContent=current===quizState.questions.length-1?'鎻愪氦娴嬭瘯':'涓嬩竴棰?;
 }
 function submitOpenAnswer(){
   const val=(document.getElementById('openAnswer')?.value||'').trim();
@@ -2275,27 +2449,25 @@ function finishQuiz(){
   }
 
   // Add to timeline
-  const phaseNames={before:'课前测试',during:'课中任务',after:'课后作业'};
+  const phaseNames={before:'璇惧墠娴嬭瘯',during:'璇句腑浠诲姟',after:'璇惧悗浣滀笟'};
   s.timeline.unshift({
     time:new Date().toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}),
-    text:`完成《${BOOKS.find(b=>b.id===bookId)?.name}》${lessonName} · ${phaseNames[phase]}，得分${finalScore}分`,
+    text:`瀹屾垚銆?{BOOKS.find(b=>b.id===bookId)?.name}銆?{lessonName} 路 ${phaseNames[phase]}锛屽緱鍒?{finalScore}鍒哷,
     score:finalScore, phase
   });
   saveData();
 
   // Show result
-  const level=finalScore>=90?'优秀':finalScore>=75?'良好':finalScore>=60?'合格':'需加油';
+  const level=finalScore>=90?'浼樼':finalScore>=75?'鑹ソ':finalScore>=60?'鍚堟牸':'闇€鍔犳补';
   const levelColor=finalScore>=90?'var(--green)':finalScore>=75?'var(--blue)':finalScore>=60?'var(--amber)':'var(--coral)';
   document.getElementById('quizBody').innerHTML=`
     <div class="result-score" style="background:${levelColor}1a;border:0.5px solid ${levelColor}40">
       <div class="result-big" style="color:${levelColor}">${finalScore}</div>
-      <div class="result-label" style="color:${levelColor}">${level} · ${mcqs.length?`${correct}/${mcqs.length}题正确`:'开放题作答完成'}</div>
+      <div class="result-label" style="color:${levelColor}">${level} 路 ${mcqs.length?`${correct}/${mcqs.length}棰樻纭甡:'寮€鏀鹃浣滅瓟瀹屾垚'}</div>
     </div>
     ${openCount?`<div style="padding:12px;background:var(--green-l);border-radius:var(--r-sm);margin-bottom:16px;font-size:12px;color:var(--green);line-height:1.7">
-      <strong>开放题反馈：</strong>你的回答展示了对社会现象较好的分析与综合能力，能够将所学知识与社会生活相联系。
-      建议进一步运用学科概念和原理进行推理与论证，提升答题的深度和说服力。
-    </div>`:''}
-    <div style="font-size:13px;font-weight:500;color:var(--gray-900);margin-bottom:10px">本次能力成长</div>
+      <strong>寮€鏀鹃鍙嶉锛?/strong>浣犵殑鍥炵瓟灞曠ず浜嗗绀句細鐜拌薄杈冨ソ鐨勫垎鏋愪笌缁煎悎鑳藉姏锛岃兘澶熷皢鎵€瀛︾煡璇嗕笌绀句細鐢熸椿鐩歌仈绯汇€?      寤鸿杩涗竴姝ヨ繍鐢ㄥ绉戞蹇靛拰鍘熺悊杩涜鎺ㄧ悊涓庤璇侊紝鎻愬崌绛旈鐨勬繁搴﹀拰璇存湇鍔涖€?    </div>`:''}
+    <div style="font-size:13px;font-weight:500;color:var(--gray-900);margin-bottom:10px">鏈鑳藉姏鎴愰暱</div>
     <div class="result-bars">
       ${questions.filter(q=>q.ability).map(q=>{
         const isCorrect=q.open?(openAnswers[questions.indexOf(q)]?.length>50):answers[questions.indexOf(q)]===q.ans;
@@ -2309,11 +2481,11 @@ function finishQuiz(){
       }).join('')}
     </div>
     <div style="margin-top:20px;padding:14px;background:var(--blue-l);border-radius:var(--r-sm);font-size:12px;color:var(--blue);line-height:1.7">
-      AI分析：${generateAIFeedback(finalScore, quizState.phase, bookId)}
+      AI鍒嗘瀽锛?{generateAIFeedback(finalScore, quizState.phase, bookId)}
     </div>
     <div class="quiz-nav" style="margin-top:20px">
-      <button class="btn-ghost" onclick="closeModal()">关闭</button>
-      <button class="btn-primary" onclick="closeModal();switchStudentPage('s-ai')">前往AI辅导 →</button>
+      <button class="btn-ghost" onclick="closeModal()">鍏抽棴</button>
+      <button class="btn-primary" onclick="closeModal();switchStudentPage('s-ai')">鍓嶅線AI杈呭 鈫?/button>
     </div>`;
 
   renderStudentChapters(currentBookIdx);
@@ -2321,15 +2493,15 @@ function finishQuiz(){
 function generateAIFeedback(score, phase, bookId){
   const book=BOOKS.find(b=>b.id===bookId);
   if(phase==='before'){
-    if(score>=75) return `你对《${book?.name}》的前置知识掌握较好，说明你具备良好的知识积累基础。课堂学习时可重点关注深层次的机制分析和案例迁移。`;
-    return `本次课前测试暴露了部分知识盲区，这是正常的，说明本课内容对你有新挑战。建议在上课前先浏览一遍教材目录，带着问题进课堂，学习效果会更好。`;
+    if(score>=75) return `浣犲銆?{book?.name}銆嬬殑鍓嶇疆鐭ヨ瘑鎺屾彙杈冨ソ锛岃鏄庝綘鍏峰鑹ソ鐨勭煡璇嗙Н绱熀纭€銆傝鍫傚涔犳椂鍙噸鐐瑰叧娉ㄦ繁灞傛鐨勬満鍒跺垎鏋愬拰妗堜緥杩佺Щ銆俙;
+    return `鏈璇惧墠娴嬭瘯鏆撮湶浜嗛儴鍒嗙煡璇嗙洸鍖猴紝杩欐槸姝ｅ父鐨勶紝璇存槑鏈鍐呭瀵逛綘鏈夋柊鎸戞垬銆傚缓璁湪涓婅鍓嶅厛娴忚涓€閬嶆暀鏉愮洰褰曪紝甯︾潃闂杩涜鍫傦紝瀛︿範鏁堟灉浼氭洿濂姐€俙;
   }
   if(phase==='during'){
-    if(score>=75) return `课中任务完成质量高，说明你在课堂上注意力集中，概念理解到位。建议课后进行迁移练习，尝试将课堂知识应用到时事分析中。`;
-    return `课中任务反映出你在${score<50?'核心概念的理解':'知识迁移应用'}方面还有提升空间。AI建议你重点复习本课的${bookId==='b3'?'制度原理与公民参与的关系':bookId==='b4'?'辩证分析方法':'基本概念与原理'}。`;
+    if(score>=75) return `璇句腑浠诲姟瀹屾垚璐ㄩ噺楂橈紝璇存槑浣犲湪璇惧爞涓婃敞鎰忓姏闆嗕腑锛屾蹇电悊瑙ｅ埌浣嶃€傚缓璁鍚庤繘琛岃縼绉荤粌涔狅紝灏濊瘯灏嗚鍫傜煡璇嗗簲鐢ㄥ埌鏃朵簨鍒嗘瀽涓€俙;
+    return `璇句腑浠诲姟鍙嶆槧鍑轰綘鍦?{score<50?'鏍稿績姒傚康鐨勭悊瑙?:'鐭ヨ瘑杩佺Щ搴旂敤'}鏂归潰杩樻湁鎻愬崌绌洪棿銆侫I寤鸿浣犻噸鐐瑰涔犳湰璇剧殑${bookId==='b3'?'鍒跺害鍘熺悊涓庡叕姘戝弬涓庣殑鍏崇郴':bookId==='b4'?'杈╄瘉鍒嗘瀽鏂规硶':'鍩烘湰姒傚康涓庡師鐞?}銆俙;
   }
-  if(score>=80) return `课后作业完成出色！你能够将课堂所学有效转化，学科素养有明显提升。特别是开放性思考题的回答，展现了很强的分析与综合能力，继续保持！`;
-  return `课后作业整体不错，但在知识运用的深度和广度上可以继续加强。AI为你识别了相关薄弱知识点，可以前往"AI智能辅导"进行针对性学习。`;
+  if(score>=80) return `璇惧悗浣滀笟瀹屾垚鍑鸿壊锛佷綘鑳藉灏嗚鍫傛墍瀛︽湁鏁堣浆鍖栵紝瀛︾绱犲吇鏈夋槑鏄炬彁鍗囥€傜壒鍒槸寮€鏀炬€ф€濊€冮鐨勫洖绛旓紝灞曠幇浜嗗緢寮虹殑鍒嗘瀽涓庣患鍚堣兘鍔涳紝缁х画淇濇寔锛乣;
+  return `璇惧悗浣滀笟鏁翠綋涓嶉敊锛屼絾鍦ㄧ煡璇嗚繍鐢ㄧ殑娣卞害鍜屽箍搴︿笂鍙互缁х画鍔犲己銆侫I涓轰綘璇嗗埆浜嗙浉鍏宠杽寮辩煡璇嗙偣锛屽彲浠ュ墠寰€"AI鏅鸿兘杈呭"杩涜閽堝鎬у涔犮€俙;
 }
 function closeModal(){
   document.getElementById('quizModal').classList.remove('open');
@@ -2339,13 +2511,13 @@ function closeModal(){
 // AI CHAT
 // ================================================================
 const AI_KNOWLEDGE = {
-  b1:['新民主主义革命','中国特色社会主义','社会主义制度的建立','改革开放','中国梦'],
-  b2:['公有制经济','市场经济体制','政府宏观调控','新发展理念','收入分配'],
-  b3:['人民代表大会制度','政治协商制度','民族区域自治','基层民主','依法治国'],
-  b4:['唯物辩证法','认识论','社会历史观','价值观','中华文化'],
-  b5:['国家主权','外交政策','国际关系','全球治理','国际经济'],
-  b6:['民法典','婚姻家庭法','劳动法','消费者权益','法律程序'],
-  b7:['形式逻辑','辩证思维','创新思维','判断推理','批判性思维'],
+  b1:['鏂版皯涓讳富涔夐潻鍛?,'涓浗鐗硅壊绀句細涓讳箟','绀句細涓讳箟鍒跺害鐨勫缓绔?,'鏀归潻寮€鏀?,'涓浗姊?],
+  b2:['鍏湁鍒剁粡娴?,'甯傚満缁忔祹浣撳埗','鏀垮簻瀹忚璋冩帶','鏂板彂灞曠悊蹇?,'鏀跺叆鍒嗛厤'],
+  b3:['浜烘皯浠ｈ〃澶т細鍒跺害','鏀挎不鍗忓晢鍒跺害','姘戞棌鍖哄煙鑷不','鍩哄眰姘戜富','渚濇硶娌诲浗'],
+  b4:['鍞墿杈╄瘉娉?,'璁よ瘑璁?,'绀句細鍘嗗彶瑙?,'浠峰€艰','涓崕鏂囧寲'],
+  b5:['鍥藉涓绘潈','澶栦氦鏀跨瓥','鍥介檯鍏崇郴','鍏ㄧ悆娌荤悊','鍥介檯缁忔祹'],
+  b6:['姘戞硶鍏?,'濠氬Щ瀹跺涵娉?,'鍔冲姩娉?,'娑堣垂鑰呮潈鐩?,'娉曞緥绋嬪簭'],
+  b7:['褰㈠紡閫昏緫','杈╄瘉鎬濈淮','鍒涙柊鎬濈淮','鍒ゆ柇鎺ㄧ悊','鎵瑰垽鎬ф€濈淮'],
 };
 
 const RESPONSE_TEMPLATES = [
@@ -2353,11 +2525,11 @@ const RESPONSE_TEMPLATES = [
     const weak=getWeakAbilities(data);
     if(!weak.length)return null;
     const ab=weak[0];
-    return `根据你的答题记录，我发现你在"${ab.name}"方面还有提升空间（当前${ab.val}分）。\n\n这个关键能力在思政学习中非常重要，我来给你针对性分析：\n\n${ab.key==='identify'?'辨识与判断能力的核心在于扎实的知识基础。面对具体社会现象时，要能准确分辨其属性、类别和特征，并与学科理论和观点相印证。建议重点复习教材中的基础概念，做到准确再认再现。':ab.key==='analyze'?'分析与综合能力要求你从不同角度剖析社会现象和问题，正确理解党的路线方针政策，最终形成整体性认识。练习方法：拿到一个社会问题，先将其拆解为多个方面逐一分析，再综合形成全面认识。':ab.key==='reason'?'推理与论证能力需要你遵循逻辑思维的要求，运用各种推理方法得出正确结论。建议多练习论述题，注意论证的逻辑性和说服力，引用恰当的论据来支撑观点。':ab.key==='inquire'?'探究与建构是较高层次的能力要求，需要在新的问题情境中灵活运用学科知识、能力和方法，形成具有新意的观点和解决方案。建议多关注时事热点，尝试提出自己的分析框架。':ab.key==='reflect'?'反思与评价属于认知领域的高层次要求，需要以建设性批判的态度对社会现象进行独立思考，批驳错误观点，作出正确价值判断。建议多研读社论评论，学习如何进行价值分析。':'继续加强相关领域的知识积累，在做题时注意理解题目背后的核心原理，而不仅仅是记忆答案。'}\n\n需要我针对某个具体知识点详细讲解吗？`;
+    return `鏍规嵁浣犵殑绛旈璁板綍锛屾垜鍙戠幇浣犲湪"${ab.name}"鏂归潰杩樻湁鎻愬崌绌洪棿锛堝綋鍓?{ab.val}鍒嗭級銆俓n\n杩欎釜鍏抽敭鑳藉姏鍦ㄦ€濇斂瀛︿範涓潪甯搁噸瑕侊紝鎴戞潵缁欎綘閽堝鎬у垎鏋愶細\n\n${ab.key==='identify'?'杈ㄨ瘑涓庡垽鏂兘鍔涚殑鏍稿績鍦ㄤ簬鎵庡疄鐨勭煡璇嗗熀纭€銆傞潰瀵瑰叿浣撶ぞ浼氱幇璞℃椂锛岃鑳藉噯纭垎杈ㄥ叾灞炴€с€佺被鍒拰鐗瑰緛锛屽苟涓庡绉戠悊璁哄拰瑙傜偣鐩稿嵃璇併€傚缓璁噸鐐瑰涔犳暀鏉愪腑鐨勫熀纭€姒傚康锛屽仛鍒板噯纭啀璁ゅ啀鐜般€?:ab.key==='analyze'?'鍒嗘瀽涓庣患鍚堣兘鍔涜姹備綘浠庝笉鍚岃搴﹀墫鏋愮ぞ浼氱幇璞″拰闂锛屾纭悊瑙ｅ厷鐨勮矾绾挎柟閽堟斂绛栵紝鏈€缁堝舰鎴愭暣浣撴€ц璇嗐€傜粌涔犳柟娉曪細鎷垮埌涓€涓ぞ浼氶棶棰橈紝鍏堝皢鍏舵媶瑙ｄ负澶氫釜鏂归潰閫愪竴鍒嗘瀽锛屽啀缁煎悎褰㈡垚鍏ㄩ潰璁よ瘑銆?:ab.key==='reason'?'鎺ㄧ悊涓庤璇佽兘鍔涢渶瑕佷綘閬靛惊閫昏緫鎬濈淮鐨勮姹傦紝杩愮敤鍚勭鎺ㄧ悊鏂规硶寰楀嚭姝ｇ‘缁撹銆傚缓璁缁冧範璁鸿堪棰橈紝娉ㄦ剰璁鸿瘉鐨勯€昏緫鎬у拰璇存湇鍔涳紝寮曠敤鎭板綋鐨勮鎹潵鏀拺瑙傜偣銆?:ab.key==='inquire'?'鎺㈢┒涓庡缓鏋勬槸杈冮珮灞傛鐨勮兘鍔涜姹傦紝闇€瑕佸湪鏂扮殑闂鎯呭涓伒娲昏繍鐢ㄥ绉戠煡璇嗐€佽兘鍔涘拰鏂规硶锛屽舰鎴愬叿鏈夋柊鎰忕殑瑙傜偣鍜岃В鍐虫柟妗堛€傚缓璁鍏虫敞鏃朵簨鐑偣锛屽皾璇曟彁鍑鸿嚜宸辩殑鍒嗘瀽妗嗘灦銆?:ab.key==='reflect'?'鍙嶆€濅笌璇勪环灞炰簬璁ょ煡棰嗗煙鐨勯珮灞傛瑕佹眰锛岄渶瑕佷互寤鸿鎬ф壒鍒ょ殑鎬佸害瀵圭ぞ浼氱幇璞¤繘琛岀嫭绔嬫€濊€冿紝鎵归┏閿欒瑙傜偣锛屼綔鍑烘纭环鍊煎垽鏂€傚缓璁鐮旇绀捐璇勮锛屽涔犲浣曡繘琛屼环鍊煎垎鏋愩€?:'缁х画鍔犲己鐩稿叧棰嗗煙鐨勭煡璇嗙Н绱紝鍦ㄥ仛棰樻椂娉ㄦ剰鐞嗚В棰樼洰鑳屽悗鐨勬牳蹇冨師鐞嗭紝鑰屼笉浠呬粎鏄蹇嗙瓟妗堛€?}\n\n闇€瑕佹垜閽堝鏌愪釜鍏蜂綋鐭ヨ瘑鐐硅缁嗚瑙ｅ悧锛焋;
   },
   (q,s,data)=>{
-    if(q.includes('雷达')||q.includes('报告')||q.includes('成绩')){
-      return `你目前的综合关键能力画像：\n\n${ABILITIES.map(a=>`• ${a.name}：${data.abilities[a.key]}分 ${data.abilities[a.key]>=70?'✓ 良好':data.abilities[a.key]>=55?'→ 待加强':'↑ 需重点关注'}`).join('\n')}\n\n你的学科素养达成情况：${COMPETENCIES.map(c=>`\n• ${c.name}：${data.competencies?.[c.key]||40}分`).join('')}\n\n"探究与建构"是关键能力中层次较高的要求，建议多在新的问题情境中灵活运用所学知识，尝试提出创新性观点和解决思路。`;
+    if(q.includes('闆疯揪')||q.includes('鎶ュ憡')||q.includes('鎴愮哗')){
+      return `浣犵洰鍓嶇殑缁煎悎鍏抽敭鑳藉姏鐢诲儚锛歕n\n${ABILITIES.map(a=>`鈥?${a.name}锛?{data.abilities[a.key]}鍒?${data.abilities[a.key]>=70?'鉁?鑹ソ':data.abilities[a.key]>=55?'鈫?寰呭姞寮?:'鈫?闇€閲嶇偣鍏虫敞'}`).join('\n')}\n\n浣犵殑瀛︾绱犲吇杈炬垚鎯呭喌锛?{COMPETENCIES.map(c=>`\n鈥?${c.name}锛?{data.competencies?.[c.key]||40}鍒哷).join('')}\n\n"鎺㈢┒涓庡缓鏋?鏄叧閿兘鍔涗腑灞傛杈冮珮鐨勮姹傦紝寤鸿澶氬湪鏂扮殑闂鎯呭涓伒娲昏繍鐢ㄦ墍瀛︾煡璇嗭紝灏濊瘯鎻愬嚭鍒涙柊鎬ц鐐瑰拰瑙ｅ喅鎬濊矾銆俙;
     }
     return null;
   },
@@ -2371,8 +2543,8 @@ function initAIChat(){
   const s=getStudent(currentStudentName);
   // Welcome message
   const weak=getWeakAbilities(s);
-  const weakText=weak.length?`根据你的学习记录，我发现你在${weak.slice(0,2).map(a=>a.name).join('、')}方面还有提升空间，我会重点为你辅导这些内容。`:'你的各项能力发展均衡，继续保持！';
-  addChatMessage('ai',`你好，${currentStudentName}同学！我是你的思政AI学习助手。\n\n${weakText}\n\n你可以问我任何思政知识问题，我会结合你的学习数据为你提供个性化解答。`);
+  const weakText=weak.length?`鏍规嵁浣犵殑瀛︿範璁板綍锛屾垜鍙戠幇浣犲湪${weak.slice(0,2).map(a=>a.name).join('銆?)}鏂归潰杩樻湁鎻愬崌绌洪棿锛屾垜浼氶噸鐐逛负浣犺緟瀵艰繖浜涘唴瀹广€俙:'浣犵殑鍚勯」鑳藉姏鍙戝睍鍧囪　锛岀户缁繚鎸侊紒';
+  addChatMessage('ai',`浣犲ソ锛?{currentStudentName}鍚屽锛佹垜鏄綘鐨勬€濇斂AI瀛︿範鍔╂墜銆俓n\n${weakText}\n\n浣犲彲浠ラ棶鎴戜换浣曟€濇斂鐭ヨ瘑闂锛屾垜浼氱粨鍚堜綘鐨勫涔犳暟鎹负浣犳彁渚涗釜鎬у寲瑙ｇ瓟銆俙);
   
   // Quick buttons
   updateQuickBtns(s);
@@ -2382,11 +2554,11 @@ function initAIChat(){
 function updateQuickBtns(s){
   const weak=getWeakAbilities(s);
   const btns=[
-    '分析我的薄弱知识点',
-    '如何提升辨识与判断能力？',
-    '怎样运用推理与论证分析问题？',
-    ...(weak.length?[`提升${weak[0]?.name}的方法`]:[]),
-    '学科素养有哪些维度？',
+    '鍒嗘瀽鎴戠殑钖勫急鐭ヨ瘑鐐?,
+    '濡備綍鎻愬崌杈ㄨ瘑涓庡垽鏂兘鍔涳紵',
+    '鎬庢牱杩愮敤鎺ㄧ悊涓庤璇佸垎鏋愰棶棰橈紵',
+    ...(weak.length?[`鎻愬崌${weak[0]?.name}鐨勬柟娉昤]:[]),
+    '瀛︾绱犲吇鏈夊摢浜涚淮搴︼紵',
   ];
   document.getElementById('chatQuickBtns').innerHTML=btns.slice(0,5).map(b=>
     `<button class="quick-btn" onclick="sendQuickMsg('${b}')">${b}</button>`
@@ -2397,7 +2569,7 @@ function addChatMessage(role, text){
   const div=document.createElement('div');
   div.className=`chat-msg ${role}`;
   div.innerHTML=`
-    <div class="chat-msg-avatar ${role==='ai'?'ai-avatar-bg':'user-avatar-bg'}">${role==='ai'?'🤖':'👤'}</div>
+    <div class="chat-msg-avatar ${role==='ai'?'ai-avatar-bg':'user-avatar-bg'}">${role==='ai'?'馃':'馃懁'}</div>
     <div class="chat-bubble">${text.replace(/\n/g,'<br>')}</div>`;
   c.appendChild(div);
   c.scrollTop=c.scrollHeight;
@@ -2407,7 +2579,7 @@ function showTyping(){
   const div=document.createElement('div');
   div.className='chat-msg ai';
   div.id='typing-indicator';
-  div.innerHTML=`<div class="chat-msg-avatar ai-avatar-bg">🤖</div>
+  div.innerHTML=`<div class="chat-msg-avatar ai-avatar-bg">馃</div>
     <div class="chat-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
   c.appendChild(div);
   c.scrollTop=c.scrollHeight;
@@ -2442,29 +2614,29 @@ function generateAIReply(question, studentData){
 
   // Knowledge search
   const q=question.toLowerCase();
-  if(q.includes('人民代表')||q.includes('人大')){
-    return `人民代表大会制度是我国的**根本政治制度**，核心要点：\n\n1. **地位**：人民代表大会是国家权力机关，行使立法权、决定权、任免权、监督权\n2. **性质**：体现人民民主专政的国家性质，保障人民当家作主\n3. **与其他机关的关系**：全国人大产生"一府一委两院"，并对其进行监督\n\n**公共参与视角**：公民通过选举人大代表间接参与国家事务，这是最重要的政治参与方式之一。你可以思考：人大代表的职责与普通公民的责任有什么联系？`;
+  if(q.includes('浜烘皯浠ｈ〃')||q.includes('浜哄ぇ')){
+    return `浜烘皯浠ｈ〃澶т細鍒跺害鏄垜鍥界殑**鏍规湰鏀挎不鍒跺害**锛屾牳蹇冭鐐癸細\n\n1. **鍦颁綅**锛氫汉姘戜唬琛ㄥぇ浼氭槸鍥藉鏉冨姏鏈哄叧锛岃浣跨珛娉曟潈銆佸喅瀹氭潈銆佷换鍏嶆潈銆佺洃鐫ｆ潈\n2. **鎬ц川**锛氫綋鐜颁汉姘戞皯涓讳笓鏀跨殑鍥藉鎬ц川锛屼繚闅滀汉姘戝綋瀹朵綔涓籠n3. **涓庡叾浠栨満鍏崇殑鍏崇郴**锛氬叏鍥戒汉澶т骇鐢?涓€搴滀竴濮斾袱闄?锛屽苟瀵瑰叾杩涜鐩戠潱\n\n**鍏叡鍙備笌瑙嗚**锛氬叕姘戦€氳繃閫変妇浜哄ぇ浠ｈ〃闂存帴鍙備笌鍥藉浜嬪姟锛岃繖鏄渶閲嶈鐨勬斂娌诲弬涓庢柟寮忎箣涓€銆備綘鍙互鎬濊€冿細浜哄ぇ浠ｈ〃鐨勮亴璐ｄ笌鏅€氬叕姘戠殑璐ｄ换鏈変粈涔堣仈绯伙紵`;
   }
-  if(q.includes('矛盾')||q.includes('辩证')){
-    return `辩证唯物主义的矛盾分析法是思政的核心思维工具：\n\n**基本原理**：\n• 矛盾即对立统一，任何事物都包含对立统一的两个方面\n• 矛盾具有普遍性（处处有，时时有）和特殊性（具体问题具体分析）\n\n**分析步骤**：\n1. 找出事物中的矛盾双方\n2. 分析主要矛盾和次要矛盾\n3. 把握矛盾的主要方面\n4. 在对立中把握统一，在统一中把握对立\n\n**应用示例**：分析"改革与稳定的关系"——改革是动力（矛盾斗争性），稳定是基础（矛盾同一性），要在保持稳定中推进改革，在深化改革中维护稳定。`;
+  if(q.includes('鐭涚浘')||q.includes('杈╄瘉')){
+    return `杈╄瘉鍞墿涓讳箟鐨勭煕鐩惧垎鏋愭硶鏄€濇斂鐨勬牳蹇冩€濈淮宸ュ叿锛歕n\n**鍩烘湰鍘熺悊**锛歕n鈥?鐭涚浘鍗冲绔嬬粺涓€锛屼换浣曚簨鐗╅兘鍖呭惈瀵圭珛缁熶竴鐨勪袱涓柟闈n鈥?鐭涚浘鍏锋湁鏅亶鎬э紙澶勫鏈夛紝鏃舵椂鏈夛級鍜岀壒娈婃€э紙鍏蜂綋闂鍏蜂綋鍒嗘瀽锛塡n\n**鍒嗘瀽姝ラ**锛歕n1. 鎵惧嚭浜嬬墿涓殑鐭涚浘鍙屾柟\n2. 鍒嗘瀽涓昏鐭涚浘鍜屾瑕佺煕鐩綷n3. 鎶婃彙鐭涚浘鐨勪富瑕佹柟闈n4. 鍦ㄥ绔嬩腑鎶婃彙缁熶竴锛屽湪缁熶竴涓妸鎻″绔媆n\n**搴旂敤绀轰緥**锛氬垎鏋?鏀归潻涓庣ǔ瀹氱殑鍏崇郴"鈥斺€旀敼闈╂槸鍔ㄥ姏锛堢煕鐩炬枟浜夋€э級锛岀ǔ瀹氭槸鍩虹锛堢煕鐩惧悓涓€鎬э級锛岃鍦ㄤ繚鎸佺ǔ瀹氫腑鎺ㄨ繘鏀归潻锛屽湪娣卞寲鏀归潻涓淮鎶ょǔ瀹氥€俙;
   }
-  if(q.includes('公共参与')||q.includes('政治参与')){
-    return `公共参与是思想政治学科核心素养的重要组成部分：\n\n**参与方式**（从制度途径角度）：\n• **选举参与**：行使选举权和被选举权，选出代表自己意志的代表\n• **协商参与**：通过人民政协、听证会、座谈会等渠道表达意见\n• **监督参与**：对国家机关及工作人员进行监督，如信访、舆论监督\n• **自治参与**：参与基层群众自治，管理本社区、村庄的公共事务\n\n**核心要求**：依法有序参与，既积极行使权利，又自觉履行义务\n\n公共参与体现了公民的政治认同和法治意识，是思政学科素养的综合体现。建议重点学习《政治与法治》中的相关内容！`;
+  if(q.includes('鍏叡鍙備笌')||q.includes('鏀挎不鍙備笌')){
+    return `鍏叡鍙備笌鏄€濇兂鏀挎不瀛︾鏍稿績绱犲吇鐨勯噸瑕佺粍鎴愰儴鍒嗭細\n\n**鍙備笌鏂瑰紡**锛堜粠鍒跺害閫斿緞瑙掑害锛夛細\n鈥?**閫変妇鍙備笌**锛氳浣块€変妇鏉冨拰琚€変妇鏉冿紝閫夊嚭浠ｈ〃鑷繁鎰忓織鐨勪唬琛╘n鈥?**鍗忓晢鍙備笌**锛氶€氳繃浜烘皯鏀垮崗銆佸惉璇佷細銆佸骇璋堜細绛夋笭閬撹〃杈炬剰瑙乗n鈥?**鐩戠潱鍙備笌**锛氬鍥藉鏈哄叧鍙婂伐浣滀汉鍛樿繘琛岀洃鐫ｏ紝濡備俊璁裤€佽垎璁虹洃鐫n鈥?**鑷不鍙備笌**锛氬弬涓庡熀灞傜兢浼楄嚜娌伙紝绠＄悊鏈ぞ鍖恒€佹潙搴勭殑鍏叡浜嬪姟\n\n**鏍稿績瑕佹眰**锛氫緷娉曟湁搴忓弬涓庯紝鏃㈢Н鏋佽浣挎潈鍒╋紝鍙堣嚜瑙夊饱琛屼箟鍔n\n鍏叡鍙備笌浣撶幇浜嗗叕姘戠殑鏀挎不璁ゅ悓鍜屾硶娌绘剰璇嗭紝鏄€濇斂瀛︾绱犲吇鐨勭患鍚堜綋鐜般€傚缓璁噸鐐瑰涔犮€婃斂娌讳笌娉曟不銆嬩腑鐨勭浉鍏冲唴瀹癸紒`;
   }
-  if(q.includes('薄弱')||q.includes('怎么提升')||q.includes('如何学')){
+  if(q.includes('钖勫急')||q.includes('鎬庝箞鎻愬崌')||q.includes('濡備綍瀛?)){
     const weak=getWeakAbilities(studentData);
     if(weak.length){
       const w=weak[0];
-      return `根据你的数据，重点提升${w.name}的建议：\n\n**当前状态**：${w.val}分（距良好还差${70-w.val}分）\n\n**针对性学习路径**：\n1. ${w.key==='identify'?'重点复习教材中的基础概念和原理，做到准确记忆和再认再现。建议每学完一个单元，整理知识框架，确保对每个概念的内涵和外延都能准确表述':w.key==='analyze'?'多练习将复杂社会现象拆解为多个维度进行分析，再综合形成整体认识。可以选取时事新闻，从政治、经济、文化等不同角度进行多维度分析':w.key==='reason'?'系统学习逻辑推理的基本方法，多做论述题和论证题，注意论据的充分性和论证过程的逻辑性。建议阅读优秀社论，学习其论证结构':w.key==='inquire'?'关注社会热点事件，在新情境中灵活运用所学知识进行分析。尝试提出自己的见解和解决方案，培养创新思维和建构能力':w.key==='reflect'?'以建设性批判的态度看待社会现象，学习批驳错误观点的方法。建议多研读权威评论文章，练习做出正确价值判断的能力':'加强相关领域的知识积累'}\n2. 多做开放性分析题，这类题目对能力提升最有效\n3. 及时完成本平台的课前、课中、课后三阶段测评\n\n要我出几道${w.name}相关的练习题吗？`;
+      return `鏍规嵁浣犵殑鏁版嵁锛岄噸鐐规彁鍗?{w.name}鐨勫缓璁細\n\n**褰撳墠鐘舵€?*锛?{w.val}鍒嗭紙璺濊壇濂借繕宸?{70-w.val}鍒嗭級\n\n**閽堝鎬у涔犺矾寰?*锛歕n1. ${w.key==='identify'?'閲嶇偣澶嶄範鏁欐潗涓殑鍩虹姒傚康鍜屽師鐞嗭紝鍋氬埌鍑嗙‘璁板繂鍜屽啀璁ゅ啀鐜般€傚缓璁瘡瀛﹀畬涓€涓崟鍏冿紝鏁寸悊鐭ヨ瘑妗嗘灦锛岀‘淇濆姣忎釜姒傚康鐨勫唴娑靛拰澶栧欢閮借兘鍑嗙‘琛ㄨ堪':w.key==='analyze'?'澶氱粌涔犲皢澶嶆潅绀句細鐜拌薄鎷嗚В涓哄涓淮搴﹁繘琛屽垎鏋愶紝鍐嶇患鍚堝舰鎴愭暣浣撹璇嗐€傚彲浠ラ€夊彇鏃朵簨鏂伴椈锛屼粠鏀挎不銆佺粡娴庛€佹枃鍖栫瓑涓嶅悓瑙掑害杩涜澶氱淮搴﹀垎鏋?:w.key==='reason'?'绯荤粺瀛︿範閫昏緫鎺ㄧ悊鐨勫熀鏈柟娉曪紝澶氬仛璁鸿堪棰樺拰璁鸿瘉棰橈紝娉ㄦ剰璁烘嵁鐨勫厖鍒嗘€у拰璁鸿瘉杩囩▼鐨勯€昏緫鎬с€傚缓璁槄璇讳紭绉€绀捐锛屽涔犲叾璁鸿瘉缁撴瀯':w.key==='inquire'?'鍏虫敞绀句細鐑偣浜嬩欢锛屽湪鏂版儏澧冧腑鐏垫椿杩愮敤鎵€瀛︾煡璇嗚繘琛屽垎鏋愩€傚皾璇曟彁鍑鸿嚜宸辩殑瑙佽В鍜岃В鍐虫柟妗堬紝鍩瑰吇鍒涙柊鎬濈淮鍜屽缓鏋勮兘鍔?:w.key==='reflect'?'浠ュ缓璁炬€ф壒鍒ょ殑鎬佸害鐪嬪緟绀句細鐜拌薄锛屽涔犳壒椹抽敊璇鐐圭殑鏂规硶銆傚缓璁鐮旇鏉冨▉璇勮鏂囩珷锛岀粌涔犲仛鍑烘纭环鍊煎垽鏂殑鑳藉姏':'鍔犲己鐩稿叧棰嗗煙鐨勭煡璇嗙Н绱?}\n2. 澶氬仛寮€鏀炬€у垎鏋愰锛岃繖绫婚鐩鑳藉姏鎻愬崌鏈€鏈夋晥\n3. 鍙婃椂瀹屾垚鏈钩鍙扮殑璇惧墠銆佽涓€佽鍚庝笁闃舵娴嬭瘎\n\n瑕佹垜鍑哄嚑閬?{w.name}鐩稿叧鐨勭粌涔犻鍚楋紵`;
     }
-    return '你的各项能力表现均衡！建议继续完成各模块的测评任务，持续积累数据，我会为你生成更精准的学习建议。';
+    return '浣犵殑鍚勯」鑳藉姏琛ㄧ幇鍧囪　锛佸缓璁户缁畬鎴愬悇妯″潡鐨勬祴璇勪换鍔★紝鎸佺画绉疮鏁版嵁锛屾垜浼氫负浣犵敓鎴愭洿绮惧噯鐨勫涔犲缓璁€?;
   }
 
   // Default response
   const tips=[
-    `这是一个很好的问题！从学科素养的角度来看，理解这个问题需要把握以下几点：首先，联系所学的制度性知识；其次，运用分析与综合的方法深入思考；最后，考虑如何在具体情境中加以运用。\n\n你能告诉我这个问题是在学哪个模块时遇到的吗？这样我可以给你更精准的解答。`,
-    `针对你的问题，我结合你的学习记录分析：你在完成相关模块测评时展现出了对基础知识的掌握，但在知识迁移应用方面还有提升空间。\n\n建议你：\n• 回顾教材中的相关原理\n• 尝试用"是什么—为什么—怎么做"的框架分析\n• 将抽象概念与具体社会现象联系起来\n\n有具体不理解的知识点吗？`,
-    `很好的思考方向！思政学习的核心不仅是记忆，更是理解和运用。\n\n从${currentStudentName}你的答题记录来看，你对概念性知识掌握较好，下一步要重点提升的是"在具体情境中运用所学原理分析问题"的能力——这正是探究与建构能力的核心体现。\n\n我推荐你多关注时事，每周选一件社会事件，尝试用思政视角分析它的背后机制。`,
+    `杩欐槸涓€涓緢濂界殑闂锛佷粠瀛︾绱犲吇鐨勮搴︽潵鐪嬶紝鐞嗚В杩欎釜闂闇€瑕佹妸鎻′互涓嬪嚑鐐癸細棣栧厛锛岃仈绯绘墍瀛︾殑鍒跺害鎬х煡璇嗭紱鍏舵锛岃繍鐢ㄥ垎鏋愪笌缁煎悎鐨勬柟娉曟繁鍏ユ€濊€冿紱鏈€鍚庯紝鑰冭檻濡備綍鍦ㄥ叿浣撴儏澧冧腑鍔犱互杩愮敤銆俓n\n浣犺兘鍛婅瘔鎴戣繖涓棶棰樻槸鍦ㄥ鍝釜妯″潡鏃堕亣鍒扮殑鍚楋紵杩欐牱鎴戝彲浠ョ粰浣犳洿绮惧噯鐨勮В绛斻€俙,
+    `閽堝浣犵殑闂锛屾垜缁撳悎浣犵殑瀛︿範璁板綍鍒嗘瀽锛氫綘鍦ㄥ畬鎴愮浉鍏虫ā鍧楁祴璇勬椂灞曠幇鍑轰簡瀵瑰熀纭€鐭ヨ瘑鐨勬帉鎻★紝浣嗗湪鐭ヨ瘑杩佺Щ搴旂敤鏂归潰杩樻湁鎻愬崌绌洪棿銆俓n\n寤鸿浣狅細\n鈥?鍥為【鏁欐潗涓殑鐩稿叧鍘熺悊\n鈥?灏濊瘯鐢?鏄粈涔堚€斾负浠€涔堚€旀€庝箞鍋?鐨勬鏋跺垎鏋怽n鈥?灏嗘娊璞℃蹇典笌鍏蜂綋绀句細鐜拌薄鑱旂郴璧锋潵\n\n鏈夊叿浣撲笉鐞嗚В鐨勭煡璇嗙偣鍚楋紵`,
+    `寰堝ソ鐨勬€濊€冩柟鍚戯紒鎬濇斂瀛︿範鐨勬牳蹇冧笉浠呮槸璁板繂锛屾洿鏄悊瑙ｅ拰杩愮敤銆俓n\n浠?{currentStudentName}浣犵殑绛旈璁板綍鏉ョ湅锛屼綘瀵规蹇垫€х煡璇嗘帉鎻¤緝濂斤紝涓嬩竴姝ヨ閲嶇偣鎻愬崌鐨勬槸"鍦ㄥ叿浣撴儏澧冧腑杩愮敤鎵€瀛﹀師鐞嗗垎鏋愰棶棰?鐨勮兘鍔涒€斺€旇繖姝ｆ槸鎺㈢┒涓庡缓鏋勮兘鍔涚殑鏍稿績浣撶幇銆俓n\n鎴戞帹鑽愪綘澶氬叧娉ㄦ椂浜嬶紝姣忓懆閫変竴浠剁ぞ浼氫簨浠讹紝灏濊瘯鐢ㄦ€濇斂瑙嗚鍒嗘瀽瀹冪殑鑳屽悗鏈哄埗銆俙,
   ];
   return tips[Math.floor(Math.random()*tips.length)];
 }
@@ -2472,7 +2644,7 @@ function renderWeakPoints(s){
   const weak=getWeakAbilities(s);
   const c=document.getElementById('weakPoints');
   if(!c)return;
-  if(!weak.length){c.innerHTML='<p style="font-size:12px;color:var(--green)">暂未发现明显薄弱点，继续保持！</p>';return;}
+  if(!weak.length){c.innerHTML='<p style="font-size:12px;color:var(--green)">鏆傛湭鍙戠幇鏄庢樉钖勫急鐐癸紝缁х画淇濇寔锛?/p>';return;}
   c.innerHTML=weak.slice(0,4).map(w=>`
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--gray-100)">
       <div style="flex:1">
@@ -2481,15 +2653,15 @@ function renderWeakPoints(s){
           <div style="height:100%;width:${w.val}%;background:${w.color};border-radius:2px"></div>
         </div>
       </div>
-      <span style="font-size:12px;color:${w.val<50?'var(--coral)':'var(--amber)'};font-weight:500">${w.val}分</span>
-      <button class="quick-btn" onclick="sendQuickMsg('如何提升${w.name}？')">辅导</button>
+      <span style="font-size:12px;color:${w.val<50?'var(--coral)':'var(--amber)'};font-weight:500">${w.val}鍒?/span>
+      <button class="quick-btn" onclick="sendQuickMsg('濡備綍鎻愬崌${w.name}锛?)">杈呭</button>
     </div>`).join('');
 }
 function renderWeekProgress(s){
   const c=document.getElementById('weekProgress');
   if(!c)return;
   const recent=s.timeline?.slice(0,5)||[];
-  if(!recent.length){c.innerHTML='<p style="font-size:12px;color:var(--gray-400)">完成第一次测评后，学习进展将在这里显示</p>';return;}
+  if(!recent.length){c.innerHTML='<p style="font-size:12px;color:var(--gray-400)">瀹屾垚绗竴娆℃祴璇勫悗锛屽涔犺繘灞曞皢鍦ㄨ繖閲屾樉绀?/p>';return;}
   c.innerHTML=`<div class="timeline">`+recent.map((t,i)=>`
     <div class="timeline-item">
       <div class="timeline-left">
@@ -2519,9 +2691,9 @@ function renderStudentReport(){
       data:{
         labels:ABILITIES.map(a=>a.name),
         datasets:[
-          {label:'当前水平',data:ABILITIES.map(a=>s.abilities[a.key]||40),
+          {label:'褰撳墠姘村钩',data:ABILITIES.map(a=>s.abilities[a.key]||40),
            borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.18)',borderWidth:2,pointBackgroundColor:'#185FA5',pointRadius:4},
-          {label:'入学基线',data:ABILITIES.map(a=>s.baseline[a.key]||38),
+          {label:'鍏ュ鍩虹嚎',data:ABILITIES.map(a=>s.baseline[a.key]||38),
            borderColor:'#D3D1C7',backgroundColor:'rgba(0,0,0,.03)',borderWidth:1.5,pointBackgroundColor:'#D3D1C7',pointRadius:3},
         ]
       },
@@ -2536,8 +2708,8 @@ function renderStudentReport(){
 
   // Radar legend
   document.getElementById('radarLegend').innerHTML=`
-    <div class="radar-legend-item"><div class="legend-swatch" style="background:#185FA5"></div>当前水平</div>
-    <div class="radar-legend-item"><div class="legend-swatch" style="background:#D3D1C7"></div>入学基线</div>`;
+    <div class="radar-legend-item"><div class="legend-swatch" style="background:#185FA5"></div>褰撳墠姘村钩</div>
+    <div class="radar-legend-item"><div class="legend-swatch" style="background:#D3D1C7"></div>鍏ュ鍩虹嚎</div>`;
 
   // Competency bars
   const cb=document.getElementById('competencyBars');
@@ -2547,7 +2719,7 @@ function renderStudentReport(){
     return `<div style="margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
         <span style="color:${c.color};font-weight:500">${c.name}</span>
-        <span style="color:var(--gray-400)">${v}分 <span style="font-size:11px;color:var(--green)">+${v-bv}</span></span>
+        <span style="color:var(--gray-400)">${v}鍒?<span style="font-size:11px;color:var(--green)">+${v-bv}</span></span>
       </div>
       <div style="height:6px;background:var(--gray-100);border-radius:3px;overflow:hidden">
         <div style="height:100%;width:${v}%;background:${c.color};border-radius:3px;transition:width .8s"></div>
@@ -2562,7 +2734,7 @@ function renderStudentReport(){
     return `<div style="margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
         <span style="color:${b.color};font-weight:500">${b.name} ${b.fullName}</span>
-        <span style="color:var(--gray-400)">${v?v+'%':'未开始'}</span>
+        <span style="color:var(--gray-400)">${v?v+'%':'鏈紑濮?}</span>
       </div>
       <div style="height:6px;background:var(--gray-100);border-radius:3px;overflow:hidden">
         <div style="height:100%;width:${v}%;background:${b.color};border-radius:3px;transition:width .8s"></div>
@@ -2581,7 +2753,7 @@ function renderStudentReport(){
     gc._chart=new Chart(gc,{
       type:'line',
       data:{
-        labels:['','','','','','本次'],
+        labels:['','','','','','鏈'],
         datasets:[{data:pts,borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.1)',
           fill:true,tension:.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#185FA5'}]
       },
@@ -2595,7 +2767,7 @@ function renderStudentReport(){
   const events=s.timeline||[];
   if(tl){
     if(!events.length){
-      tl.innerHTML='<p style="font-size:12px;color:var(--gray-400);text-align:center;padding:20px">完成第一次测评后，你的学习轨迹将在这里记录</p>';
+      tl.innerHTML='<p style="font-size:12px;color:var(--gray-400);text-align:center;padding:20px">瀹屾垚绗竴娆℃祴璇勫悗锛屼綘鐨勫涔犺建杩瑰皢鍦ㄨ繖閲岃褰?/p>';
     } else {
       tl.innerHTML=`<div class="timeline">`+events.map((e,i)=>`
         <div class="timeline-item">
@@ -2606,7 +2778,7 @@ function renderStudentReport(){
           <div class="timeline-content">
             <div class="timeline-time">${e.time}</div>
             <div class="timeline-text">${e.text}</div>
-            <span class="score-pill ${e.score>=85?'score-a':e.score>=70?'score-b':e.score>=60?'score-c':'score-d'}" style="margin-top:4px;display:inline-block">${e.score}分</span>
+            <span class="score-pill ${e.score>=85?'score-a':e.score>=70?'score-b':e.score>=60?'score-c':'score-d'}" style="margin-top:4px;display:inline-block">${e.score}鍒?/span>
           </div>
         </div>`).join('')+`</div>`;
     }
@@ -2619,14 +2791,11 @@ function renderStudentReport(){
     const strong=ABILITIES.filter(a=>s.abilities[a.key]>=65);
     const weak=ABILITIES.filter(a=>s.abilities[a.key]<55);
     pc.innerHTML=`<div style="padding:16px;background:var(--blue-l);border-radius:var(--r-sm);border-left:3px solid var(--blue)">
-      ${currentStudentName}同学在思政学科关键能力方面综合得分${avgAbility}分，整体处于${avgAbility>=75?'良好':'发展中'}水平。
-      ${strong.length?`你在${strong.map(a=>a.name).join('、')}方面表现突出，`:''}
-      ${weak.length?`${weak.map(a=>a.name).join('、')}是当前需要重点提升的方向。`:'各维度发展较为均衡。'}
+      ${currentStudentName}鍚屽鍦ㄦ€濇斂瀛︾鍏抽敭鑳藉姏鏂归潰缁煎悎寰楀垎${avgAbility}鍒嗭紝鏁翠綋澶勪簬${avgAbility>=75?'鑹ソ':'鍙戝睍涓?}姘村钩銆?      ${strong.length?`浣犲湪${strong.map(a=>a.name).join('銆?)}鏂归潰琛ㄧ幇绐佸嚭锛宍:''}
+      ${weak.length?`${weak.map(a=>a.name).join('銆?)}鏄綋鍓嶉渶瑕侀噸鐐规彁鍗囩殑鏂瑰悜銆俙:'鍚勭淮搴﹀彂灞曡緝涓哄潎琛°€?}
       <br><br>
-      从学科素养达成程度来看，${COMPETENCIES.map(c=>`${c.name}${s.competencies?.[c.key]||40}分`).join('、')}。
-      ${events.length>0?`你已累计完成${events.length}次评价任务，学习轨迹显示你在每次测评后都有所成长，这种持续性学习习惯非常宝贵。`:'你刚刚开始使用本平台，完成更多测评后将生成更精准的学习画像。'}
-      建议你充分利用AI辅导功能，将课堂知识与时事分析相结合，在具体情境中灵活运用所学知识，成为具备政治认同、科学精神、法治意识和公共参与素养的现代公民。
-    </div>`;
+      浠庡绉戠礌鍏昏揪鎴愮▼搴︽潵鐪嬶紝${COMPETENCIES.map(c=>`${c.name}${s.competencies?.[c.key]||40}鍒哷).join('銆?)}銆?      ${events.length>0?`浣犲凡绱瀹屾垚${events.length}娆¤瘎浠蜂换鍔★紝瀛︿範杞ㄨ抗鏄剧ず浣犲湪姣忔娴嬭瘎鍚庨兘鏈夋墍鎴愰暱锛岃繖绉嶆寔缁€у涔犱範鎯潪甯稿疂璐点€俙:'浣犲垰鍒氬紑濮嬩娇鐢ㄦ湰骞冲彴锛屽畬鎴愭洿澶氭祴璇勫悗灏嗙敓鎴愭洿绮惧噯鐨勫涔犵敾鍍忋€?}
+      寤鸿浣犲厖鍒嗗埄鐢ˋI杈呭鍔熻兘锛屽皢璇惧爞鐭ヨ瘑涓庢椂浜嬪垎鏋愮浉缁撳悎锛屽湪鍏蜂綋鎯呭涓伒娲昏繍鐢ㄦ墍瀛︾煡璇嗭紝鎴愪负鍏峰鏀挎不璁ゅ悓銆佺瀛︾簿绁炪€佹硶娌绘剰璇嗗拰鍏叡鍙備笌绱犲吇鐨勭幇浠ｅ叕姘戙€?    </div>`;
   }
 }
 function exportStudentReport(){
@@ -2638,14 +2807,14 @@ function exportStudentReport(){
     bookMastery:s.bookMastery,
     scores:s.scores,
     timeline:s.timeline,
-    summary:`${currentStudentName}同学思政学科素养增值评价报告`
+    summary:`${currentStudentName}鍚屽鎬濇斂瀛︾绱犲吇澧炲€艰瘎浠锋姤鍛奰
   };
   const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`${currentStudentName}_学习报告_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.json`;
+  a.download=`${currentStudentName}_瀛︿範鎶ュ憡_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.json`;
   a.click();
-  toast('报告已导出');
+  toast('鎶ュ憡宸插鍑?);
 }
 
 // ================================================================
@@ -2665,8 +2834,7 @@ function toast(msg){
 // ================================================================
 // INIT
 // ================================================================
-// Restore last login（始终执行，不依赖 Supabase）
-(function restoreLastLogin(){
+// Restore last login锛堝缁堟墽琛岋紝涓嶄緷璧?Supabase锛?(function restoreLastLogin(){
   const last = JSON.parse(localStorage.getItem('szpj_lastlogin')||'null');
   if(last){
     document.getElementById('loginClassCode').value = last.classCode||'';
@@ -2683,7 +2851,7 @@ migrateQBank();
 
 // Generate demo students for teacher view
 function ensureDemoData(){
-  const demoNames=['李明','王芳','张伟','陈静','赵磊'];
+  const demoNames=['鏉庢槑','鐜嬭姵','寮犱紵','闄堥潤','璧电'];
   demoNames.forEach(name=>{
     if(!studentData[name]){
       const s=getStudent(name);
@@ -2711,8 +2879,8 @@ function ensureDemoData(){
         s.bookMastery[bid]=Math.round(50+Math.random()*40);
       });
       s.timeline=[{
-        time:'5月20日 08:00',
-        text:`完成《必修1》第一课 · 课前测试，得分${s.scores['b1_0_0_before']}分`,
+        time:'5鏈?0鏃?08:00',
+        text:`瀹屾垚銆婂繀淇?銆嬬涓€璇?路 璇惧墠娴嬭瘯锛屽緱鍒?{s.scores['b1_0_0_before']}鍒哷,
         score:s.scores['b1_0_0_before'],
         phase:'before'
       }];
@@ -2721,6 +2889,251 @@ function ensureDemoData(){
   saveData();
 }
 ensureDemoData();
+
+// ================================================================
+// ADMIN APP
+// ================================================================
+function initAdminApp(){
+  switchAdminPage('a-teachers');
+  loadAdminTeachers();
+  loadAdminStudents();
+}
+function switchAdminPage(id){
+  document.querySelectorAll('#adminApp .page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('#adminApp .nav-tab').forEach((t,i)=>{
+    t.classList.toggle('active', ['a-teachers','a-students','a-password'][i]===id);
+  });
+  if(id==='a-teachers') loadAdminTeachers();
+  if(id==='a-students') loadAdminStudents();
+}
+
+// 鈹€鈹€ 鏁欏笀绠＄悊 鈹€鈹€
+async function loadAdminTeachers(){
+  const tbody = document.getElementById('adminTeacherBody');
+  if(!db){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">浜戠鏈繛鎺?/td></tr>'; return; }
+  try{
+    const {data: classes, error} = await db.from('class_config').select('*').order('created_at',{ascending:false});
+    if(error){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--coral);padding:24px">鍔犺浇澶辫触: '+error.message+'</td></tr>'; return; }
+    if(!classes || classes.length===0){
+      tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">鏆傛棤鏁欏笀璐﹀彿</td></tr>'; return;
+    }
+    tbody.innerHTML = classes.map(c=>`<tr>
+      <td><strong>${c.class_code}</strong></td>
+      <td>${c.teacher_name||'-'}</td>
+      <td style="font-size:12px;color:var(--gray-400)">${new Date(c.created_at).toLocaleDateString('zh-CN')}</td>
+      <td>
+        <button class="btn-sm" onclick="openAdminTeacherModal('edit','${c.class_code}','${(c.teacher_name||'').replace(/'/g,"\\'")}','${(c.teacher_password||'').replace(/'/g,"\\'")}')">缂栬緫</button>
+        <button class="btn-sm" style="color:var(--coral);border-color:#f0997b" onclick="deleteAdminTeacher('${c.class_code}')">鍒犻櫎</button>
+      </td>
+    </tr>`).join('');
+  }catch(e){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--coral);padding:24px">鍔犺浇鍑洪敊: '+e.message+'</td></tr>';
+  }
+}
+function openAdminTeacherModal(mode, code, name, pwd){
+  document.getElementById('adminTeacherTitle').textContent = mode==='add'?'鏂板鏁欏笀':'缂栬緫鏁欏笀';
+  document.getElementById('at_origCode').value = mode==='edit'?code:'';
+  document.getElementById('at_classCode').value = mode==='edit'?code:'';
+  document.getElementById('at_classCode').disabled = (mode==='edit');
+  document.getElementById('at_teacherName').value = mode==='edit'?(name||''):'';
+  document.getElementById('at_password').value = mode==='edit'?(pwd||''):'';
+  document.getElementById('at_error').style.display='none';
+  openEditorModal('adminTeacherModal');
+}
+async function saveAdminTeacher(){
+  const origCode = document.getElementById('at_origCode').value;
+  const classCode = document.getElementById('at_classCode').value.trim().toUpperCase();
+  const teacherName = document.getElementById('at_teacherName').value.trim();
+  const password = document.getElementById('at_password').value;
+  const errEl = document.getElementById('at_error');
+  if(!classCode){ errEl.textContent='璇疯緭鍏ョ彮绾х爜'; errEl.style.display='block'; return; }
+  if(!teacherName){ errEl.textContent='璇疯緭鍏ユ暀甯堝鍚?; errEl.style.display='block'; return; }
+  if(!password && !origCode){ errEl.textContent='璇疯缃鐞嗗瘑鐮?; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  try{
+    if(origCode){
+      // 缂栬緫妯″紡
+      const updates = {teacher_name:teacherName};
+      if(password) updates.teacher_password = password;
+      await db.from('class_config').update(updates).eq('class_code',origCode);
+      if(origCode!==classCode){
+        toast('鐝骇鐮佷笉鍙慨鏀癸紝濡傞渶鏇存敼璇峰垹闄ゅ悗閲嶆柊鍒涘缓');
+      }
+    } else {
+      // 鏂板妯″紡
+      const {error} = await db.from('class_config').insert({
+        class_code:classCode, teacher_name:teacherName, teacher_password:password
+      });
+      if(error){
+        if(error.code==='23505'){ errEl.textContent='璇ョ彮绾х爜宸插瓨鍦?; errEl.style.display='block'; return; }
+        errEl.textContent='淇濆瓨澶辫触: '+error.message; errEl.style.display='block'; return;
+      }
+    }
+    closeEditorModal('adminTeacherModal');
+    loadAdminTeachers();
+    toast(origCode?'鏁欏笀淇℃伅宸叉洿鏂?:'鏁欏笀璐﹀彿宸插垱寤?);
+  }catch(e){
+    errEl.textContent='鎿嶄綔澶辫触: '+e.message; errEl.style.display='block';
+  }
+}
+async function deleteAdminTeacher(code){
+  if(!confirm('纭畾瑕佸垹闄ょ彮绾?'+code+' 鐨勬暀甯堣处鍙峰悧锛熸鎿嶄綔涓嶅彲鎾ら攢銆?)) return;
+  try{
+    await db.from('class_config').delete().eq('class_code',code);
+    // 鍚屾椂鍒犻櫎璇ョ彮绾х殑瀛︾敓鏁版嵁
+    await db.from('users').delete().eq('class_code',code).eq('role','student');
+    loadAdminTeachers();
+    loadAdminStudents();
+    toast('鏁欏笀璐﹀彿鍙婂叧鑱斿鐢熷凡鍒犻櫎');
+  }catch(e){
+    toast('鍒犻櫎澶辫触: '+e.message);
+  }
+}
+
+// 鈹€鈹€ 瀛︾敓绠＄悊 鈹€鈹€
+async function loadAdminStudents(){
+  const tbody = document.getElementById('adminStudentBody');
+  if(!db){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">浜戠鏈繛鎺?/td></tr>'; return; }
+  try{
+    const {data: students, error} = await db.from('users').select('*').eq('role','student').order('created_at',{ascending:false});
+    if(error){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--coral);padding:24px">鍔犺浇澶辫触: '+error.message+'</td></tr>'; return; }
+    if(!students || students.length===0){
+      tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">鏆傛棤瀛︾敓璐﹀彿</td></tr>'; return;
+    }
+    tbody.innerHTML = students.map(s=>`<tr>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.class_code||'-'}</td>
+      <td style="font-size:12px;color:var(--gray-400)">${new Date(s.created_at).toLocaleDateString('zh-CN')}</td>
+      <td>
+        <button class="btn-sm" onclick="openAdminStudentModal('edit','${s.id}','${s.name.replace(/'/g,"\\'")}','${(s.class_code||'').replace(/'/g,"\\'")}','${(s.password||'').replace(/'/g,"\\'")}')">缂栬緫</button>
+        <button class="btn-sm" style="color:var(--coral);border-color:#f0997b" onclick="deleteAdminStudent('${s.id}','${s.name.replace(/'/g,"\\'")}')">鍒犻櫎</button>
+      </td>
+    </tr>`).join('');
+  }catch(e){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--coral);padding:24px">鍔犺浇鍑洪敊: '+e.message+'</td></tr>';
+  }
+}
+function openAdminStudentModal(mode, id, name, classCode, pwd){
+  document.getElementById('adminStudentTitle').textContent = mode==='add'?'鏂板瀛︾敓':'缂栬緫瀛︾敓';
+  document.getElementById('as_origId').value = mode==='edit'?id:'';
+  document.getElementById('as_name').value = mode==='edit'?(name||''):'';
+  document.getElementById('as_classCode').value = mode==='edit'?(classCode||''):'';
+  document.getElementById('as_password').value = mode==='edit'?(pwd||''):'';
+  document.getElementById('as_error').style.display='none';
+  openEditorModal('adminStudentModal');
+}
+async function saveAdminStudent(){
+  const origId = document.getElementById('as_origId').value;
+  const name = document.getElementById('as_name').value.trim();
+  const classCode = document.getElementById('as_classCode').value.trim().toUpperCase();
+  const password = document.getElementById('as_password').value;
+  const errEl = document.getElementById('as_error');
+  if(!name){ errEl.textContent='璇疯緭鍏ュ鐢熷鍚?; errEl.style.display='block'; return; }
+  if(!classCode){ errEl.textContent='璇疯緭鍏ョ彮绾х爜'; errEl.style.display='block'; return; }
+  if(!password && !origId){ errEl.textContent='璇疯缃櫥褰曞瘑鐮?; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  try{
+    if(origId){
+      const updates = {name, class_code:classCode};
+      if(password) updates.password = password;
+      await db.from('users').update(updates).eq('id',origId);
+    } else {
+      const {error} = await db.from('users').insert({
+        name, class_code:classCode, password, role:'student'
+      });
+      if(error){ errEl.textContent='淇濆瓨澶辫触: '+error.message; errEl.style.display='block'; return; }
+    }
+    closeEditorModal('adminStudentModal');
+    loadAdminStudents();
+    toast(origId?'瀛︾敓淇℃伅宸叉洿鏂?:'瀛︾敓璐﹀彿宸插垱寤?);
+  }catch(e){
+    errEl.textContent='鎿嶄綔澶辫触: '+e.message; errEl.style.display='block';
+  }
+}
+async function deleteAdminStudent(id, name){
+  if(!confirm('纭畾瑕佸垹闄ゅ鐢?'+name+' 鐨勮处鍙峰悧锛熸鎿嶄綔涓嶅彲鎾ら攢銆?)) return;
+  try{
+    await db.from('users').delete().eq('id',id);
+    loadAdminStudents();
+    toast('瀛︾敓璐﹀彿宸插垹闄?);
+  }catch(e){
+    toast('鍒犻櫎澶辫触: '+e.message);
+  }
+}
+// 绠＄悊鍛樿嚜宸变慨鏀瑰瘑鐮?async function submitAdminChangePwd(){
+  const oldPwd = document.getElementById('ap_oldPwd').value;
+  const newPwd = document.getElementById('ap_newPwd').value;
+  const confirmPwd = document.getElementById('ap_confirmPwd').value;
+  const errEl = document.getElementById('ap_error');
+  if(!oldPwd){ errEl.textContent='璇疯緭鍏ュ綋鍓嶅瘑鐮?; errEl.style.display='block'; return; }
+  if(!newPwd){ errEl.textContent='璇疯緭鍏ユ柊瀵嗙爜'; errEl.style.display='block'; return; }
+  if(newPwd!==confirmPwd){ errEl.textContent='涓ゆ杈撳叆鐨勬柊瀵嗙爜涓嶄竴鑷?; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  try{
+    // 楠岃瘉褰撳墠瀵嗙爜
+    const {data: admins} = await db.from('users').select('password')
+      .eq('name',currentUserName).eq('role','admin').limit(1);
+    if(!admins||admins.length===0||admins[0].password!==oldPwd){
+      errEl.textContent='褰撳墠瀵嗙爜閿欒'; errEl.style.display='block'; return;
+    }
+    await db.from('users').update({password:newPwd})
+      .eq('name',currentUserName).eq('role','admin');
+    toast('瀵嗙爜淇敼鎴愬姛');
+    document.getElementById('ap_oldPwd').value='';
+    document.getElementById('ap_newPwd').value='';
+    document.getElementById('ap_confirmPwd').value='';
+  }catch(e){
+    errEl.textContent='淇敼澶辫触: '+e.message; errEl.style.display='block';
+  }
+}
+
+// ================================================================
+// 閫氱敤淇敼瀵嗙爜锛堟暀甯?瀛︾敓锛?// ================================================================
+function openChangePwdModal(){
+  document.getElementById('cp_oldPwd').value='';
+  document.getElementById('cp_newPwd').value='';
+  document.getElementById('cp_confirmPwd').value='';
+  document.getElementById('cp_error').style.display='none';
+  openEditorModal('changePwdModal');
+}
+async function submitChangePwd(){
+  const oldPwd = document.getElementById('cp_oldPwd').value;
+  const newPwd = document.getElementById('cp_newPwd').value;
+  const confirmPwd = document.getElementById('cp_confirmPwd').value;
+  const errEl = document.getElementById('cp_error');
+  if(!oldPwd){ errEl.textContent='璇疯緭鍏ュ綋鍓嶅瘑鐮?; errEl.style.display='block'; return; }
+  if(!newPwd){ errEl.textContent='璇疯緭鍏ユ柊瀵嗙爜'; errEl.style.display='block'; return; }
+  if(newPwd!==confirmPwd){ errEl.textContent='涓ゆ杈撳叆鐨勬柊瀵嗙爜涓嶄竴鑷?; errEl.style.display='block'; return; }
+  if(!db){ errEl.textContent='浜戠鏈繛鎺ワ紝鏃犳硶淇敼瀵嗙爜'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  try{
+    if(currentUserRole==='teacher'){
+      // 鏁欏笀锛氭洿鏂?class_config
+      const {data: cls} = await db.from('class_config').select('teacher_password')
+        .eq('class_code',currentClassCode).maybeSingle();
+      if(!cls || cls.teacher_password!==oldPwd){
+        errEl.textContent='褰撳墠瀵嗙爜閿欒'; errEl.style.display='block'; return;
+      }
+      await db.from('class_config').update({teacher_password:newPwd})
+        .eq('class_code',currentClassCode);
+    } else if(currentUserRole==='student'){
+      // 瀛︾敓锛氭洿鏂?users 琛?      const {data: stu} = await db.from('users').select('password')
+        .eq('class_code',currentClassCode).eq('name',currentUserName)
+        .eq('role','student').order('created_at',{ascending:false}).limit(1);
+      if(!stu||stu.length===0||stu[0].password!==oldPwd){
+        errEl.textContent='褰撳墠瀵嗙爜閿欒'; errEl.style.display='block'; return;
+      }
+      await db.from('users').update({password:newPwd})
+        .eq('class_code',currentClassCode).eq('name',currentUserName).eq('role','student');
+    }
+    closeEditorModal('changePwdModal');
+    toast('瀵嗙爜淇敼鎴愬姛');
+  }catch(e){
+    errEl.textContent='淇敼澶辫触: '+e.message; errEl.style.display='block';
+  }
+}
+
 </script>
 </body>
 </html>
