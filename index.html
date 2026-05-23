@@ -450,16 +450,12 @@ nav{
 
 <!-- ===== LOGIN SCREEN ===== -->
 <div class="role-screen" id="roleScreen">
-  <div style="text-align:center">
-    <div style="font-size:28px;margin-bottom:8px">金华市外国语学校</div>
-    <h1>高中思想政治学科学习系统</h1>
-    <p style="margin-top:8px">基于AI增强评估理论 · 全过程学习评价 · 增值性成长追踪</p>
-  </div>
-  <div style="width:360px;max-width:90vw">
-    <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">班级码</label>
-      <input id="loginClassCode" type="text" placeholder="例如：SZPJ2026A" 
-        style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none;text-transform:uppercase">
+  <!-- ===== 登录面板 ===== -->
+  <div id="loginPanel" style="width:360px;max-width:90vw">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:28px;margin-bottom:8px">金华市外国语学校</div>
+      <h1>高中思想政治学科学习系统</h1>
+      <p style="margin-top:8px">基于AI增强评估理论 · 全过程学习评价 · 增值性成长追踪</p>
     </div>
     <div style="margin-bottom:16px">
       <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">你的姓名</label>
@@ -468,32 +464,69 @@ nav{
         onkeydown="if(event.key==='Enter')document.getElementById('loginPassword').focus()">
     </div>
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">登录身份</label>
-      <div style="display:flex;gap:10px">
-        <div class="role-card" id="loginRoleTeacher" onclick="selectLoginRole('teacher')" style="flex:1;padding:16px">
-          <div class="icon">👩‍🏫</div>
-          <h2>教师端</h2>
-        </div>
-        <div class="role-card" id="loginRoleAdmin" onclick="selectLoginRole('admin')" style="flex:1;padding:16px">
-          <div class="icon">🔧</div>
-          <h2>管理员</h2>
-        </div>
-        <div class="role-card" id="loginRoleStudent" onclick="selectLoginRole('student')" style="flex:1;padding:16px">
-          <div class="icon">📚</div>
-          <h2>学生端</h2>
-        </div>
-      </div>
-    </div>
-    <div id="loginPasswordField" style="margin-bottom:16px">
-      <label id="loginPasswordLabel" style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">管理密码</label>
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">密码</label>
       <input id="loginPassword" type="password" placeholder="请输入密码"
         style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none"
         onkeydown="if(event.key==='Enter')handleLogin()">
-      <p id="loginPasswordHint" style="font-size:11px;color:var(--gray-400);margin-top:4px">首次使用将自动创建班级，此密码即为班级管理密码</p>
     </div>
-    <button class="btn-primary" style="width:100%;padding:12px;font-size:14px;border-radius:var(--r-sm)" onclick="handleLogin()">进入系统</button>
+    <button class="btn-primary" style="width:100%;padding:12px;font-size:14px;border-radius:var(--r-sm)" onclick="handleLogin()">登 录</button>
     <div id="loginError" style="margin-top:10px;text-align:center;font-size:12px;color:var(--coral);display:none"></div>
     <div id="loginStatus" style="margin-top:10px;text-align:center;font-size:11px;color:var(--gray-400)"></div>
+    <div style="text-align:center;margin-top:20px">
+      <span style="font-size:13px;color:var(--gray-400)">没有账号？</span>
+      <a href="javascript:void(0)" onclick="showRegisterPanel()" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">注册新账号</a>
+    </div>
+  </div>
+
+  <!-- ===== 注册面板 ===== -->
+  <div id="registerPanel" style="display:none;width:400px;max-width:90vw">
+    <div style="text-align:center;margin-bottom:28px">
+      <h1>注册新账号</h1>
+      <p style="margin-top:8px">请填写以下信息完成注册</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">班级码</label>
+      <input id="regClassCode" type="text" placeholder="例如：SZPJ2026A（教师注册时为你的班级码）"
+        style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none;text-transform:uppercase">
+      <p id="regClassCodeHint" style="font-size:11px;color:var(--gray-400);margin-top:4px"></p>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">你的姓名</label>
+      <input id="regName" type="text" placeholder="请输入真实姓名"
+        style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none"
+        onkeydown="if(event.key==='Enter')document.getElementById('regPassword').focus()">
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">注册身份</label>
+      <div style="display:flex;gap:10px">
+        <div class="role-card selected" id="regRoleTeacher" onclick="selectRegRole('teacher')" style="flex:1;padding:16px">
+          <div class="icon">👩‍🏫</div>
+          <h2>教师</h2>
+        </div>
+        <div class="role-card" id="regRoleStudent" onclick="selectRegRole('student')" style="flex:1;padding:16px">
+          <div class="icon">📚</div>
+          <h2>学生</h2>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">设置密码</label>
+      <input id="regPassword" type="password" placeholder="请设置登录密码"
+        style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none"
+        onkeydown="if(event.key==='Enter')document.getElementById('regConfirmPwd').focus()">
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:4px">确认密码</label>
+      <input id="regConfirmPwd" type="password" placeholder="再次输入密码"
+        style="width:100%;padding:10px 12px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);font-size:14px;outline:none"
+        onkeydown="if(event.key==='Enter')handleRegister()">
+    </div>
+    <button class="btn-primary" style="width:100%;padding:12px;font-size:14px;border-radius:var(--r-sm)" onclick="handleRegister()">注 册</button>
+    <div id="regError" style="margin-top:10px;text-align:center;font-size:12px;color:var(--coral);display:none"></div>
+    <div style="text-align:center;margin-top:20px">
+      <span style="font-size:13px;color:var(--gray-400)">已有账号？</span>
+      <a href="javascript:void(0)" onclick="showLoginPanel()" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">返回登录</a>
+    </div>
   </div>
 </div>
 
@@ -1056,153 +1089,214 @@ function initSupabase(){
 }
 
 // ── Login UI helpers ──
-function selectLoginRole(role){
-  currentUserRole = role;
-  document.getElementById('loginRoleTeacher').classList.toggle('selected', role==='teacher');
-  document.getElementById('loginRoleAdmin').classList.toggle('selected', role==='admin');
-  document.getElementById('loginRoleStudent').classList.toggle('selected', role==='student');
-  // 始终显示密码区，根据角色切换标签文案
-  var pwLabel = document.getElementById('loginPasswordLabel');
-  var pwHint = document.getElementById('loginPasswordHint');
-  var pwInput = document.getElementById('loginPassword');
-  var ccInput = document.getElementById('loginClassCode');
+// ── 面板切换 ──
+function showLoginPanel(){
+  document.getElementById('loginPanel').style.display='block';
+  document.getElementById('registerPanel').style.display='none';
+}
+function showRegisterPanel(){
+  document.getElementById('loginPanel').style.display='none';
+  document.getElementById('registerPanel').style.display='block';
+  document.getElementById('regError').style.display='none';
+}
+
+// ── 注册角色选择 ──
+var regRole = 'teacher';
+function selectRegRole(role){
+  regRole = role;
+  document.getElementById('regRoleTeacher').classList.toggle('selected', role==='teacher');
+  document.getElementById('regRoleStudent').classList.toggle('selected', role==='student');
+  var hint = document.getElementById('regClassCodeHint');
   if(role==='teacher'){
-    pwLabel.textContent = '管理密码';
-    pwInput.placeholder = '教师设置的管理密码';
-    pwHint.textContent = '首次使用将自动创建班级，此密码即为班级管理密码';
-    ccInput.placeholder = '例如：SZPJ2026A';
-  } else if(role==='admin'){
-    pwLabel.textContent = '管理密码';
-    pwInput.placeholder = '请输入管理员密码';
-    pwHint.textContent = '管理员可管理所有教师和学生账号';
-    ccInput.placeholder = '管理员无需班级码（可选填）';
+    hint.textContent = '设置班级码后，学生通过此班级码加入你的班级';
+    document.getElementById('regClassCode').placeholder = '例如：SZPJ2026A（你的专属班级码）';
   } else {
-    pwLabel.textContent = '登录密码';
-    pwInput.placeholder = '请输入密码（首次登录即设置）';
-    pwHint.textContent = '首次登录请设置个人密码，后续登录凭此密码进入';
-    ccInput.placeholder = '例如：SZPJ2026A';
+    hint.textContent = '请向教师获取班级码';
+    document.getElementById('regClassCode').placeholder = '例如：SZPJ2026A';
   }
 }
 
-// ── Login handler ──
+// ── 登录处理（姓名+密码，自动匹配角色）──
 async function handleLogin(){
-  const classCode = document.getElementById('loginClassCode').value.trim().toUpperCase();
   const name = document.getElementById('loginName').value.trim();
   const password = document.getElementById('loginPassword').value;
   const errEl = document.getElementById('loginError');
 
-  if(!classCode && currentUserRole!=='admin'){ showLoginError('请输入班级码'); return; }
   if(!name){ showLoginError('请输入姓名'); return; }
-  if(!currentUserRole){ showLoginError('请选择登录身份'); return; }
-
+  if(!password){ showLoginError('请输入密码'); return; }
   errEl.style.display='none';
   setStatus('正在连接...');
-
-  currentClassCode = classCode;
   currentUserName = name;
 
-  // Save login info
-  localStorage.setItem('szpj_lastlogin', JSON.stringify({classCode, name, role:currentUserRole}));
-
   if(cloudConnected){
-    try{
-      if(currentUserRole==='admin'){
-        // 管理员验证
-        if(!password){ showLoginError('请输入管理员密码'); setStatus(''); return; }
-        const {data: admins, error: admErr} = await db
-          .from('users').select('password')
-          .eq('name', name).eq('role','admin').limit(1);
-        if(admErr){ showLoginError('查询失败: '+admErr.message); setStatus(''); return; }
-        if(!admins || admins.length===0){
-          // 新管理员首次登录：自动创建账号
-          await db.from('users').insert({name, role:'admin', password});
+    try {
+      // 1. 先查管理员
+      const {data: admins, error: admErr} = await db
+        .from('users').select('id,name,password,role,class_code')
+        .eq('name', name).eq('role','admin').eq('password', password).limit(1);
+      if(!admErr && admins && admins.length>0){
+        currentUserRole = 'admin';
+        currentClassCode = '';
+        localStorage.setItem('szpj_lastlogin', JSON.stringify({name, role:'admin'}));
+        setStatus('✓ 登录成功');
+        setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
+        enterApp();
+        return;
+      }
+
+      // 2. 查教师（class_config 表）
+      const {data: teachers, error: tErr} = await db
+        .from('class_config').select('*')
+        .eq('teacher_name', name).eq('teacher_password', password);
+      if(!tErr && teachers && teachers.length>0){
+        currentUserRole = 'teacher';
+        currentClassCode = teachers[0].class_code;
+        localStorage.setItem('szpj_lastlogin', JSON.stringify({name, role:'teacher', classCode:currentClassCode}));
+        await loadCloudData();
+        startRealtime();
+        setStatus('✓ 登录成功');
+        setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
+        enterApp();
+        return;
+      }
+
+      // 3. 查学生（users 表）
+      const {data: students, error: sErr} = await db
+        .from('users').select('id,name,password,role,class_code')
+        .eq('name', name).eq('password', password).eq('role','student');
+      if(!sErr && students && students.length>0){
+        if(students.length>1){
+          // 多个班级同名同密码学生，取第一个（或弹窗选择）
+          currentUserRole = 'student';
+          currentClassCode = students[0].class_code;
         } else {
-          if(admins[0].password !== password){
-            showLoginError('管理员密码错误'); setStatus(''); return;
-          }
+          currentUserRole = 'student';
+          currentClassCode = students[0].class_code;
         }
-      }
-      else if(currentUserRole==='teacher'){
-        // Check if class exists
-        const {data: cls, error} = await db
-          .from('class_config')
-          .select('*')
-          .eq('class_code', classCode)
-          .maybeSingle();
-
-        if(cls){
-          // Existing class: verify password
-          if(cls.teacher_password !== password){
-            showLoginError('管理密码错误'); setStatus(''); return;
-          }
-          // Update teacher name
-          await db.from('class_config').update({teacher_name:name}).eq('class_code',classCode);
-        } else {
-          // Create new class
-          if(!password){ showLoginError('首次创建班级请设置管理密码'); setStatus(''); return; }
-          const {error: ce} = await db.from('class_config').insert({
-            class_code:classCode, teacher_name:name, teacher_password:password
-          });
-          if(ce){ showLoginError('创建班级失败: '+ce.message); setStatus(''); return; }
-          // Seed default books/qbank
-          await cloudWrite('books', DEFAULT_BOOKS);
-          await cloudWrite('qbank', DEFAULT_QBANK);
-        }
-      }
-      if(currentUserRole==='student'){
-        // 学生端密码验证
-        if(!password){ showLoginError('请输入登录密码（首次登录即设置）'); setStatus(''); return; }
-        const {data: stuUsers, error: stuErr} = await db
-          .from('users')
-          .select('password')
-          .eq('class_code', classCode)
-          .eq('name', name)
-          .eq('role', 'student')
-          .order('created_at', {ascending:false})
-          .limit(1);
-        if(!stuErr && stuUsers && stuUsers.length>0){
-          // 老学生：验证密码
-          if(stuUsers[0].password !== password){
-            showLoginError('密码错误'); setStatus(''); return;
-          }
-        }
-        // 新学生：密码已输入，下面 upsert 时自动存入
+        localStorage.setItem('szpj_lastlogin', JSON.stringify({name, role:'student', classCode:currentClassCode}));
+        await loadCloudData();
+        startRealtime();
+        setStatus('✓ 登录成功');
+        setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
+        enterApp();
+        return;
       }
 
-      // Register/login user
-      await db.from('users').upsert({
-        name, role:currentUserRole, class_code:classCode,
-        password: password || null
-      }, {onConflict:'id'});
-
-      // Load cloud data
-      setStatus('正在同步数据...');
-      await loadCloudData();
-      startRealtime();
-      setStatus('✓ 云端已连接');
-      setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
-    }catch(e){
+      // 都没匹配到
+      showLoginError('账号或密码错误，请检查后重试');
+      setStatus('');
+    } catch(e){
       console.error('[Cloud] 登录验证失败:', e);
-      // 教师端必须通过云端验证密码，不能放行
-      if(currentUserRole==='teacher'){
-        showLoginError('网络连接失败，无法验证身份，请检查网络后重试');
+      showLoginError('网络连接失败，请检查网络后重试');
+      setStatus('');
+    }
+  } else {
+    showLoginError('云端未连接，无法登录');
+    setStatus('');
+  }
+}
+
+// ── 注册处理 ──
+async function handleRegister(){
+  const classCode = document.getElementById('regClassCode').value.trim().toUpperCase();
+  const name = document.getElementById('regName').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const confirmPwd = document.getElementById('regConfirmPwd').value;
+  const errEl = document.getElementById('regError');
+
+  if(!classCode){ showRegError('请输入班级码'); return; }
+  if(!name){ showRegError('请输入姓名'); return; }
+  if(!password){ showRegError('请设置密码'); return; }
+  if(password.length<3){ showRegError('密码至少3位'); return; }
+  if(password !== confirmPwd){ showRegError('两次密码输入不一致'); return; }
+  errEl.style.display='none';
+  setStatus('正在注册...');
+
+  if(!cloudConnected){
+    showRegError('云端未连接，无法注册');
+    setStatus('');
+    return;
+  }
+
+  try {
+    if(regRole === 'teacher'){
+      // 检查班级码是否已存在
+      const {data: existCls} = await db
+        .from('class_config').select('class_code').eq('class_code', classCode).maybeSingle();
+      if(existCls){
+        showRegError('该班级码已被使用，请更换');
         setStatus('');
         return;
       }
-      // 学生端允许离线登录（输入班级码+姓名即可）
-      console.warn('[Cloud] 学生端离线登录');
-    }
-  } else {
-    // 云端未连接
-    if(currentUserRole==='teacher'){
-      showLoginError('云端未连接，教师端无法登录');
-      setStatus('');
-      return;
-    }
-    setStatus('本地模式（未配置云端）');
-  }
+      // 创建班级
+      const {error: ce} = await db.from('class_config').insert({
+        class_code: classCode, teacher_name: name, teacher_password: password
+      });
+      if(ce){ showRegError('注册失败: '+ce.message); setStatus(''); return; }
+      // 初始化默认数据
+      currentClassCode = classCode;
+      await cloudWrite('books', DEFAULT_BOOKS);
+      await cloudWrite('qbank', DEFAULT_QBANK);
+      // 注册成功，自动登录
+      currentUserRole = 'teacher';
+      currentUserName = name;
+      localStorage.setItem('szpj_lastlogin', JSON.stringify({name, role:'teacher', classCode}));
+      await loadCloudData();
+      startRealtime();
+      setStatus('✓ 注册成功');
+      setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
+      enterApp();
 
-  // Enter app
+    } else {
+      // 学生注册：检查班级码是否存在
+      const {data: cls} = await db
+        .from('class_config').select('class_code').eq('class_code', classCode).maybeSingle();
+      if(!cls){
+        showRegError('班级码不存在，请向教师确认');
+        setStatus('');
+        return;
+      }
+      // 检查是否已有同名学生
+      const {data: existStu} = await db
+        .from('users').select('id')
+        .eq('class_code', classCode).eq('name', name).eq('role','student')
+        .maybeSingle();
+      if(existStu){
+        showRegError('该班级已有同名学生，请联系教师');
+        setStatus('');
+        return;
+      }
+      // 创建学生
+      const {error: se} = await db.from('users').insert({
+        name, role:'student', class_code: classCode, password
+      });
+      if(se){ showRegError('注册失败: '+se.message); setStatus(''); return; }
+      // 注册成功，自动登录
+      currentUserRole = 'student';
+      currentUserName = name;
+      currentClassCode = classCode;
+      localStorage.setItem('szpj_lastlogin', JSON.stringify({name, role:'student', classCode}));
+      await loadCloudData();
+      startRealtime();
+      setStatus('✓ 注册成功');
+      setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
+      enterApp();
+    }
+  } catch(e){
+    console.error('[Cloud] 注册失败:', e);
+    showRegError('注册失败，请检查网络后重试');
+    setStatus('');
+  }
+}
+
+function showRegError(msg){
+  const el = document.getElementById('regError');
+  el.textContent = msg;
+  el.style.display='block';
+}
+
+// ── 进入应用 ──
+function enterApp(){
   document.getElementById('roleScreen').style.display='none';
   currentRole = currentUserRole;
   if(currentUserRole==='teacher'){
@@ -1212,9 +1306,9 @@ async function handleLogin(){
     document.getElementById('adminApp').style.display='block';
     initAdminApp();
   } else {
-    currentStudentName = name;
+    currentStudentName = currentUserName;
     document.getElementById('studentApp').style.display='block';
-    document.getElementById('studentNameChip').textContent = name+'同学';
+    document.getElementById('studentNameChip').textContent = currentUserName+'同学';
     initStudentApp();
   }
 }
@@ -1711,8 +1805,11 @@ function backToRole(){
   document.getElementById('teacherApp').style.display='none';
   document.getElementById('adminApp').style.display='none';
   document.getElementById('studentApp').style.display='none';
+  showLoginPanel();
   document.getElementById('roleScreen').style.display='flex';
   currentRole=null;
+  currentUserRole=null;
+  document.getElementById('loginPassword').value='';
   setStatus('');
 }
 
@@ -2860,9 +2957,7 @@ function toast(msg){
 (function restoreLastLogin(){
   const last = JSON.parse(localStorage.getItem('szpj_lastlogin')||'null');
   if(last){
-    document.getElementById('loginClassCode').value = last.classCode||'';
     document.getElementById('loginName').value = last.name||'';
-    if(last.role) selectLoginRole(last.role);
   }
 })();
 initSupabase();
