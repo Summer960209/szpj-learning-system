@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS users (
   role TEXT NOT NULL CHECK (role IN ('teacher','student','admin')),
   password TEXT,
   class_code TEXT,
+  is_super BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -52,9 +53,32 @@ CREATE TABLE IF NOT EXISTS class_config (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- 邀请码表（总管理员生成）
+CREATE TABLE IF NOT EXISTS invitation_codes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  code TEXT UNIQUE NOT NULL,
+  created_by TEXT NOT NULL,
+  used_by TEXT,
+  used_at TIMESTAMPTZ,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active','used','revoked')),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 管理员-班级关联表（总管理员分配）
+CREATE TABLE IF NOT EXISTS admin_class_mapping (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  admin_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  class_code TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(admin_id, class_code)
+);
+
 -- 开启 RLS（行级安全策略）
 ALTER TABLE app_data ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE class_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE invitation_codes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_class_mapping ENABLE ROW LEVEL SECURITY;
 
 -- 允许匿名读取（按班级码过滤）
 CREATE POLICY "Allow anon read by class" ON app_data
@@ -76,6 +100,12 @@ CREATE POLICY "Allow anon users" ON users
   FOR ALL USING (true);
 
 CREATE POLICY "Allow anon class" ON class_config
+  FOR ALL USING (true);
+
+CREATE POLICY "Allow anon invitation_codes" ON invitation_codes
+  FOR ALL USING (true);
+
+CREATE POLICY "Allow anon admin_class_mapping" ON admin_class_mapping
   FOR ALL USING (true);
 
 -- 启用 Realtime
@@ -477,7 +507,7 @@ nav{
       <a href="javascript:void(0)" onclick="showRegisterPanel()" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">注册新账号</a>
     </div>
     <div style="text-align:center;margin-top:10px">
-      <a href="javascript:void(0)" onclick="handleAdminLogin()" style="font-size:11px;color:var(--gray-400);text-decoration:none">管理员入口</a>
+      <a href="javascript:void(0)" onclick="showAdminEntry()" style="font-size:11px;color:var(--gray-400);text-decoration:none">管理员入口</a>
     </div>
   </div>
 
@@ -656,68 +686,119 @@ nav{
       <div class="nav-logo">政</div>
       金华外国语高中思政学习系统
     </div>
-    <div class="nav-tabs">
-      <button class="nav-tab active" onclick="switchAdminPage('a-teachers')">教师管理</button>
-      <button class="nav-tab" onclick="switchAdminPage('a-students')">学生管理</button>
-      <button class="nav-tab" onclick="switchAdminPage('a-password')">修改密码</button>
+    <div class="nav-tabs" id="adminNavTabs">
+      <!-- 标签页由 JS 动态生成 -->
     </div>
     <div class="nav-right">
-      <span class="chip" style="background:var(--purple-l);color:var(--purple)">管理员</span>
+      <span class="chip" id="adminRoleChip" style="background:var(--purple-l);color:var(--purple)">管理员</span>
       <button class="btn-sm" onclick="backToRole()">退出</button>
     </div>
   </nav>
 
-  <!-- A: 教师管理 -->
-  <div class="page active" id="a-teachers">
-    <div class="section-header">
-      <div><div class="section-label">教师账号管理</div><div class="section-sub">管理所有班级的教师账号与密码</div></div>
-      <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="openAdminTeacherModal('add')">＋ 新增教师</button>
+  <!-- ========== 总管理员面板（陈洋） ========== -->
+  <div id="superAdminPanel">
+    <!-- SA: 管理员管理 -->
+    <div class="page active" id="sa-admins">
+      <div class="section-header">
+        <div><div class="section-label">管理员管理</div><div class="section-sub">管理所有子管理员账号，分配班级权限</div></div>
+        <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="openInviteCodeModal()">＋ 生成邀请码</button>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">邀请码</div>
+        <div class="card-sub">生成邀请码后发送给新管理员，用于注册</div>
+        <div id="inviteCodeList"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">管理员列表</div>
+        <div class="card-sub">查看所有管理员，分配班级管理权限</div>
+        <table class="student-table">
+          <thead><tr><th>姓名</th><th>班级权限</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody id="superAdminBody"></tbody>
+        </table>
+      </div>
     </div>
-    <div class="card">
-      <table class="student-table" id="adminTeacherTable">
-        <thead>
-          <tr><th>班级码</th><th>教师姓名</th><th>创建时间</th><th>操作</th></tr>
-        </thead>
-        <tbody id="adminTeacherBody"></tbody>
-      </table>
+
+    <!-- SA: 教师管理 -->
+    <div class="page" id="sa-teachers">
+      <div class="section-header">
+        <div><div class="section-label">教师账号管理</div><div class="section-sub">管理所有班级的教师账号与密码</div></div>
+        <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="openAdminTeacherModal('add')">＋ 新增教师</button>
+      </div>
+      <div class="card">
+        <table class="student-table" id="adminTeacherTable">
+          <thead><tr><th>班级码</th><th>教师姓名</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody id="adminTeacherBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SA: 学生管理 -->
+    <div class="page" id="sa-students">
+      <div class="section-header">
+        <div><div class="section-label">学生账号管理</div><div class="section-sub">管理所有学生账号与密码</div></div>
+        <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="openAdminStudentModal('add')">＋ 新增学生</button>
+      </div>
+      <div class="card">
+        <table class="student-table" id="adminStudentTable">
+          <thead><tr><th>姓名</th><th>班级码</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody id="adminStudentBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SA: 修改密码 -->
+    <div class="page" id="sa-password">
+      <div class="card" style="max-width:480px;margin:0 auto">
+        <div class="card-title">修改管理员密码</div>
+        <div class="card-sub">修改当前管理员账号的登录密码</div>
+        <div class="editor-form-row"><label>当前密码</label><input class="editor-input" id="ap_oldPwd" type="password" placeholder="请输入当前密码"></div>
+        <div class="editor-form-row"><label>新密码</label><input class="editor-input" id="ap_newPwd" type="password" placeholder="请输入新密码"></div>
+        <div class="editor-form-row"><label>确认新密码</label><input class="editor-input" id="ap_confirmPwd" type="password" placeholder="请再次输入新密码"></div>
+        <div id="ap_error" style="font-size:12px;color:var(--coral);margin-bottom:12px;display:none"></div>
+        <button class="btn-primary" style="width:100%;padding:10px;font-size:13px" onclick="submitAdminChangePwd()">确认修改</button>
+      </div>
     </div>
   </div>
 
-  <!-- A: 学生管理 -->
-  <div class="page" id="a-students">
-    <div class="section-header">
-      <div><div class="section-label">学生账号管理</div><div class="section-sub">管理所有学生账号与密码</div></div>
-      <button class="btn-primary" style="font-size:12px;padding:7px 16px" onclick="openAdminStudentModal('add')">＋ 新增学生</button>
+  <!-- ========== 普通管理员面板 ========== -->
+  <div id="normalAdminPanel" style="display:none">
+    <!-- NA: 教师管理（仅授权班级） -->
+    <div class="page active" id="na-teachers">
+      <div class="section-header">
+        <div><div class="section-label">教师账号管理</div><div class="section-sub">管理你负责班级的教师账号</div></div>
+      </div>
+      <div class="card">
+        <table class="student-table">
+          <thead><tr><th>班级码</th><th>教师姓名</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody id="naTeacherBody"></tbody>
+        </table>
+      </div>
     </div>
-    <div class="card">
-      <table class="student-table" id="adminStudentTable">
-        <thead>
-          <tr><th>姓名</th><th>班级码</th><th>创建时间</th><th>操作</th></tr>
-        </thead>
-        <tbody id="adminStudentBody"></tbody>
-      </table>
-    </div>
-  </div>
 
-  <!-- A: 修改密码 -->
-  <div class="page" id="a-password">
-    <div class="card" style="max-width:480px;margin:0 auto">
-      <div class="card-title">修改管理员密码</div>
-      <div class="card-sub">修改当前管理员账号的登录密码</div>
-      <div class="editor-form-row">
-        <label>当前密码</label>
-        <input class="editor-input" id="ap_oldPwd" type="password" placeholder="请输入当前密码">
+    <!-- NA: 学生管理（仅授权班级） -->
+    <div class="page" id="na-students">
+      <div class="section-header">
+        <div><div class="section-label">学生账号管理</div><div class="section-sub">管理你负责班级的学生账号</div></div>
       </div>
-      <div class="editor-form-row">
-        <label>新密码</label>
-        <input class="editor-input" id="ap_newPwd" type="password" placeholder="请输入新密码">
+      <div class="card">
+        <table class="student-table">
+          <thead><tr><th>姓名</th><th>班级码</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody id="naStudentBody"></tbody>
+        </table>
       </div>
-      <div class="editor-form-row">
-        <label>确认新密码</label>
-        <input class="editor-input" id="ap_confirmPwd" type="password" placeholder="请再次输入新密码">
+    </div>
+
+    <!-- NA: 修改密码 -->
+    <div class="page" id="na-password">
+      <div class="card" style="max-width:480px;margin:0 auto">
+        <div class="card-title">修改密码</div>
+        <div class="card-sub">修改当前管理员账号的登录密码</div>
+        <div class="editor-form-row"><label>当前密码</label><input class="editor-input" id="nap_oldPwd" type="password" placeholder="请输入当前密码"></div>
+        <div class="editor-form-row"><label>新密码</label><input class="editor-input" id="nap_newPwd" type="password" placeholder="请输入新密码"></div>
+        <div class="editor-form-row"><label>确认新密码</label><input class="editor-input" id="nap_confirmPwd" type="password" placeholder="请再次输入新密码"></div>
+        <div id="nap_error" style="font-size:12px;color:var(--coral);margin-bottom:12px;display:none"></div>
+        <button class="btn-primary" style="width:100%;padding:10px;font-size:13px" onclick="submitNormalAdminChangePwd()">确认修改</button>
       </div>
-      <div id="ap_error" style="font-size:12px;color:var(--coral);margin-bottom:12px;display:none"></div>
-      <button class="btn-primary" style="width:100%;padding:10px;font-size:13px" onclick="submitAdminChangePwd()">确认修改</button>
     </div>
   </div>
 </div>
@@ -925,6 +1006,76 @@ nav{
   </div>
 </div>
 
+<!-- ===== 总管理员：生成邀请码弹窗 ===== -->
+<div class="editor-modal-overlay" id="inviteCodeModal">
+  <div class="editor-modal sm">
+    <div class="modal-head">
+      <div class="modal-title">生成邀请码</div>
+      <button class="modal-close" onclick="closeEditorModal('inviteCodeModal')">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px">生成邀请码后，将邀请码发送给新管理员，对方在管理员入口注册时输入邀请码即可。</p>
+    <div style="text-align:center;padding:16px;background:var(--blue-l);border-radius:var(--r-sm);margin-bottom:16px">
+      <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px">新邀请码</div>
+      <div id="newInviteCode" style="font-size:24px;font-weight:600;color:var(--blue);letter-spacing:2px;font-family:monospace"></div>
+    </div>
+    <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn-ghost" onclick="closeEditorModal('inviteCodeModal')">关闭</button>
+      <button class="btn-primary" onclick="generateInviteCode()">生成新邀请码</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 总管理员：分配班级弹窗 ===== -->
+<div class="editor-modal-overlay" id="assignClassModal">
+  <div class="editor-modal sm">
+    <div class="modal-head">
+      <div class="modal-title">分配班级权限</div>
+      <button class="modal-close" onclick="closeEditorModal('assignClassModal')">✕</button>
+    </div>
+    <input type="hidden" id="ac_adminId">
+    <div id="ac_adminName" style="font-size:14px;font-weight:500;margin-bottom:12px"></div>
+    <label style="font-size:12px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:8px">选择要授权的班级（可多选）</label>
+    <div id="ac_classCheckboxes" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
+    <div id="ac_error" style="font-size:12px;color:var(--coral);margin:12px 0;display:none"></div>
+    <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn-ghost" onclick="closeEditorModal('assignClassModal')">取消</button>
+      <button class="btn-primary" onclick="saveAdminClassMapping()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 管理员注册弹窗（邀请码方式）===== -->
+<div class="editor-modal-overlay" id="adminRegisterModal">
+  <div class="editor-modal sm">
+    <div class="modal-head">
+      <div class="modal-title">管理员注册</div>
+      <button class="modal-close" onclick="closeEditorModal('adminRegisterModal')">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px">请输入总管理员提供的邀请码完成注册</p>
+    <div class="editor-form-row">
+      <label>你的姓名</label>
+      <input class="editor-input" id="ar_name" placeholder="请输入管理员姓名">
+    </div>
+    <div class="editor-form-row">
+      <label>设置密码</label>
+      <input class="editor-input" id="ar_password" type="password" placeholder="请设置登录密码">
+    </div>
+    <div class="editor-form-row">
+      <label>确认密码</label>
+      <input class="editor-input" id="ar_confirmPwd" type="password" placeholder="请再次输入密码">
+    </div>
+    <div class="editor-form-row">
+      <label>邀请码</label>
+      <input class="editor-input" id="ar_inviteCode" placeholder="请输入总管理员提供的邀请码" style="text-transform:uppercase">
+    </div>
+    <div id="ar_error" style="font-size:12px;color:var(--coral);margin-bottom:12px;display:none"></div>
+    <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn-ghost" onclick="closeEditorModal('adminRegisterModal')">取消</button>
+      <button class="btn-primary" onclick="handleAdminRegister()">注册</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== QUIZ MODAL ===== -->
 <div class="modal-overlay" id="quizModal">
   <div class="modal" id="quizModalInner">
@@ -1119,47 +1270,154 @@ function selectRegRole(role){
   }
 }
 
-// ── 管理员登录入口（首次自动创建）──
-async function handleAdminLogin(){
-  const name = document.getElementById('loginName').value.trim();
-  const password = document.getElementById('loginPassword').value;
+// ── 管理员入口 ──
+async function showAdminEntry(){
+  var name = document.getElementById('loginName').value.trim();
+  var password = document.getElementById('loginPassword').value;
   if(!name){ showLoginError('请先输入管理员姓名'); return; }
   if(!password){ showLoginError('请先输入管理员密码'); return; }
+  if(!cloudConnected){ showLoginError('云端未连接'); return; }
 
-  if(!cloudConnected){ showLoginError('云端未连接，无法登录'); return; }
-
+  document.getElementById('loginError').style.display='none';
   setStatus('正在验证...');
-  const errEl = document.getElementById('loginError');
-  errEl.style.display='none';
 
   try {
-    // 查是否已有该管理员
-    const {data: admins, error: admErr} = await db
-      .from('users').select('id,password')
+    if(name === '陈洋'){
+      // 总管理员直接登录
+      handleSuperAdminLogin();
+      return;
+    }
+
+    // 子管理员：查是否已注册
+    const {data: admins} = await db
+      .from('users').select('id,password,is_super')
       .eq('name', name).eq('role','admin').limit(1);
 
-    if(admErr){ showLoginError('查询失败: '+admErr.message); setStatus(''); return; }
+    if(admins && admins.length>0){
+      // 已注册，验证密码
+      if(admins[0].password !== password){
+        showLoginError('密码错误'); setStatus(''); return;
+      }
+      currentAdminId = admins[0].id;
+      isSuperAdmin = false;
+      currentUserRole = 'admin';
+      currentClassCode = '';
+      currentUserName = name;
+      localStorage.setItem('szpj_lastlogin', JSON.stringify({name, role:'admin'}));
+      setStatus('✓ 登录成功');
+      setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
+      enterApp();
+    } else {
+      // 未注册，弹出注册框（需邀请码）
+      setStatus('');
+      openEditorModal('adminRegisterModal');
+      document.getElementById('ar_name').value = name;
+      document.getElementById('ar_password').value = password;
+      document.getElementById('ar_confirmPwd').value = '';
+      document.getElementById('ar_inviteCode').value = '';
+      document.getElementById('ar_error').style.display='none';
+    }
+  } catch(e){
+    showLoginError('网络连接失败'); setStatus('');
+  }
+}
+
+// ── 总管理员登录（陈洋）──
+async function handleSuperAdminLogin(){
+  var name = '陈洋';
+  var password = document.getElementById('loginPassword').value;
+  if(!password){ showLoginError('请输入管理员密码'); return; }
+  if(!cloudConnected){ showLoginError('云端未连接'); return; }
+
+  setStatus('正在验证...');
+  document.getElementById('loginError').style.display='none';
+
+  try {
+    const {data: admins, error} = await db
+      .from('users').select('id,password,is_super')
+      .eq('name', name).eq('role','admin').limit(1);
+
+    if(error){ showLoginError('查询失败: '+error.message); setStatus(''); return; }
 
     if(!admins || admins.length===0){
-      // 首次：自动创建管理员账号
-      const {error: insErr} = await db.from('users').insert({name, role:'admin', password});
-      if(insErr){ showLoginError('创建管理员失败: '+insErr.message); setStatus(''); return; }
+      // 首次：自动创建总管理员
+      const {error: insErr} = await db.from('users').insert({name, role:'admin', password, is_super: true});
+      if(insErr){ showLoginError('创建失败: '+insErr.message); setStatus(''); return; }
     } else {
       if(admins[0].password !== password){
-        showLoginError('管理员密码错误'); setStatus(''); return;
+        showLoginError('密码错误'); setStatus(''); return;
+      }
+      // 确保标记为总管理员
+      if(!admins[0].is_super){
+        await db.from('users').update({is_super: true}).eq('id', admins[0].id);
       }
     }
 
     currentUserRole = 'admin';
+    isSuperAdmin = true;
     currentClassCode = '';
     currentUserName = name;
+    currentAdminId = name;
     localStorage.setItem('szpj_lastlogin', JSON.stringify({name, role:'admin'}));
     setStatus('✓ 登录成功');
     setTimeout(()=>{ document.getElementById('loginStatus').textContent=''; }, 2000);
     enterApp();
   } catch(e){
-    console.error('[Cloud] 管理员登录失败:', e);
+    console.error('[Cloud] 总管理员登录失败:', e);
     showLoginError('网络连接失败'); setStatus('');
+  }
+}
+
+// ── 子管理员注册 ──
+async function handleAdminRegister(){
+  var name = document.getElementById('ar_name').value.trim();
+  var password = document.getElementById('ar_password').value;
+  var confirmPwd = document.getElementById('ar_confirmPwd').value;
+  var inviteCode = document.getElementById('ar_inviteCode').value.trim().toUpperCase();
+  var errEl = document.getElementById('ar_error');
+
+  if(!name){ errEl.textContent='请输入姓名'; errEl.style.display='block'; return; }
+  if(!password){ errEl.textContent='请设置密码'; errEl.style.display='block'; return; }
+  if(password!==confirmPwd){ errEl.textContent='两次密码不一致'; errEl.style.display='block'; return; }
+  if(!inviteCode){ errEl.textContent='请输入邀请码'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+
+  try {
+    // 验证邀请码
+    const {data: codes, error: cErr} = await db
+      .from('invitation_codes').select('*').eq('code', inviteCode).eq('status','active');
+    if(cErr){ errEl.textContent='验证邀请码失败'; errEl.style.display='block'; return; }
+    if(!codes || codes.length===0){ errEl.textContent='邀请码无效或已使用'; errEl.style.display='block'; return; }
+
+    // 检查是否已有同名管理员
+    const {data: existAdmin} = await db
+      .from('users').select('id').eq('name', name).eq('role','admin').maybeSingle();
+    if(existAdmin){ errEl.textContent='该管理员姓名已存在'; errEl.style.display='block'; return; }
+
+    // 创建管理员
+    const {data: newAdmin, error: insErr} = await db.from('users').insert({
+      name, role:'admin', password, is_super: false
+    }).select('id').single();
+    if(insErr){ errEl.textContent='注册失败: '+insErr.message; errEl.style.display='block'; return; }
+
+    // 标记邀请码为已使用
+    await db.from('invitation_codes').update({
+      status: 'used', used_by: name, used_at: new Date().toISOString()
+    }).eq('id', codes[0].id);
+
+    closeEditorModal('adminRegisterModal');
+    toast('注册成功！总管理员需要为你分配班级权限后才能管理');
+
+    // 自动登录
+    currentUserRole = 'admin';
+    isSuperAdmin = false;
+    currentClassCode = '';
+    currentUserName = name;
+    currentAdminId = newAdmin.id;
+    localStorage.setItem('szpj_lastlogin', JSON.stringify({name, role:'admin'}));
+    enterApp();
+  } catch(e){
+    errEl.textContent='注册失败: '+e.message; errEl.style.display='block';
   }
 }
 
@@ -1329,13 +1587,24 @@ function showRegError(msg){
 }
 
 // ── 进入应用 ──
-function enterApp(){
+async function enterApp(){
   document.getElementById('roleScreen').style.display='none';
   currentRole = currentUserRole;
   if(currentUserRole==='teacher'){
     document.getElementById('teacherApp').style.display='block';
     initTeacherApp();
   } else if(currentUserRole==='admin'){
+    // 获取管理员完整信息（包括 id 和 is_super）
+    if(!isSuperAdmin && !currentAdminId){
+      try {
+        var {data:adminInfo} = await db.from('users').select('id,is_super')
+          .eq('name',currentUserName).eq('role','admin').limit(1);
+        if(adminInfo && adminInfo.length>0){
+          currentAdminId = adminInfo[0].id;
+          isSuperAdmin = adminInfo[0].is_super;
+        }
+      } catch(e){}
+    }
     document.getElementById('adminApp').style.display='block';
     initAdminApp();
   } else {
@@ -1842,6 +2111,9 @@ function backToRole(){
   document.getElementById('roleScreen').style.display='flex';
   currentRole=null;
   currentUserRole=null;
+  isSuperAdmin=false;
+  currentAdminId=null;
+  normalAdminClasses=[];
   document.getElementById('loginPassword').value='';
   setStatus('');
 }
@@ -3044,19 +3316,305 @@ ensureDemoData();
 // ================================================================
 // ADMIN APP
 // ================================================================
+var isSuperAdmin = false;
+var currentAdminId = null;
+
 function initAdminApp(){
-  switchAdminPage('a-teachers');
+  if(isSuperAdmin){
+    initSuperAdminPanel();
+  } else {
+    initNormalAdminPanel();
+  }
+}
+
+// ── 总管理员面板 ──
+function initSuperAdminPanel(){
+  document.getElementById('superAdminPanel').style.display='block';
+  document.getElementById('normalAdminPanel').style.display='none';
+  document.getElementById('adminRoleChip').textContent='总管理员';
+  document.getElementById('adminRoleChip').style.background='var(--coral-l)';
+  document.getElementById('adminRoleChip').style.color='var(--coral)';
+  // 生成标签页
+  var tabs = [
+    {id:'sa-admins', label:'管理员管理'},
+    {id:'sa-teachers', label:'教师管理'},
+    {id:'sa-students', label:'学生管理'},
+    {id:'sa-password', label:'修改密码'}
+  ];
+  renderAdminTabs(tabs, 'sa-admins');
+  loadAdminList();
   loadAdminTeachers();
   loadAdminStudents();
+  loadInviteCodes();
 }
+function renderAdminTabs(tabs, activeId){
+  var navTabs = document.getElementById('adminNavTabs');
+  navTabs.innerHTML = tabs.map(t=>
+    `<button class="nav-tab ${t.id===activeId?'active':''}" onclick="switchAdminPage('${t.id}')">${t.label}</button>`
+  ).join('');
+}
+
+// ── 普通管理员面板 ──
+async function initNormalAdminPanel(){
+  document.getElementById('superAdminPanel').style.display='none';
+  document.getElementById('normalAdminPanel').style.display='block';
+  document.getElementById('adminRoleChip').textContent='管理员';
+  document.getElementById('adminRoleChip').style.background='var(--purple-l)';
+  document.getElementById('adminRoleChip').style.color='var(--purple)';
+  var tabs = [
+    {id:'na-teachers', label:'教师管理'},
+    {id:'na-students', label:'学生管理'},
+    {id:'na-password', label:'修改密码'}
+  ];
+  renderAdminTabs(tabs, 'na-teachers');
+  await loadNormalAdminClasses();
+  loadNormalAdminTeachers();
+  loadNormalAdminStudents();
+}
+
+// ── 普通管理员获取被授权的班级 ──
+var normalAdminClasses = [];
+async function loadNormalAdminClasses(){
+  try {
+    const {data: mappings} = await db.from('admin_class_mapping')
+      .select('class_code').eq('admin_id', currentAdminId);
+    normalAdminClasses = mappings ? mappings.map(m=>m.class_code) : [];
+  } catch(e){ normalAdminClasses = []; }
+}
+function loadNormalAdminTeachers(){
+  var tbody = document.getElementById('naTeacherBody');
+  if(!normalAdminClasses.length){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">总管理员尚未为你分配班级权限</td></tr>';
+    return;
+  }
+  loadAdminTeachersFiltered(normalAdminClasses, 'naTeacherBody');
+}
+function loadNormalAdminStudents(){
+  var tbody = document.getElementById('naStudentBody');
+  if(!normalAdminClasses.length){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">总管理员尚未为你分配班级权限</td></tr>';
+    return;
+  }
+  loadAdminStudentsFiltered(normalAdminClasses, 'naStudentBody');
+}
+
+function loadAdminTeachersFiltered(classCodes, tbodyId){
+  var tbody = document.getElementById(tbodyId);
+  if(!db){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">云端未连接</td></tr>'; return; }
+  db.from('class_config').select('*').in('class_code', classCodes).order('created_at',{ascending:false})
+    .then(({data:classes, error})=>{
+      if(error){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--coral);padding:24px">加载失败</td></tr>'; return; }
+      if(!classes||classes.length===0){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">暂无教师</td></tr>'; return; }
+      tbody.innerHTML = classes.map(c=>`<tr>
+        <td><strong>${c.class_code}</strong></td>
+        <td>${c.teacher_name||'-'}</td>
+        <td style="font-size:12px;color:var(--gray-400)">${new Date(c.created_at).toLocaleDateString('zh-CN')}</td>
+        <td>
+          <button class="btn-sm" onclick="openAdminTeacherModal('edit','${c.class_code}','${(c.teacher_name||'').replace(/'/g,"\\'")}','${(c.teacher_password||'').replace(/'/g,"\\'")}')">编辑</button>
+        </td>
+      </tr>`).join('');
+    }).catch(e=>{ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--coral);padding:24px">加载出错</td></tr>'; });
+}
+
+function loadAdminStudentsFiltered(classCodes, tbodyId){
+  var tbody = document.getElementById(tbodyId);
+  if(!db){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">云端未连接</td></tr>'; return; }
+  db.from('users').select('*').eq('role','student').in('class_code', classCodes).order('created_at',{ascending:false})
+    .then(({data:students, error})=>{
+      if(error){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--coral);padding:24px">加载失败</td></tr>'; return; }
+      if(!students||students.length===0){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">暂无学生</td></tr>'; return; }
+      tbody.innerHTML = students.map(s=>`<tr>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.class_code||'-'}</td>
+        <td style="font-size:12px;color:var(--gray-400)">${new Date(s.created_at).toLocaleDateString('zh-CN')}</td>
+        <td>
+          <button class="btn-sm" onclick="openAdminStudentModal('edit','${s.id}','${s.name.replace(/'/g,"\\'")}','${(s.class_code||'').replace(/'/g,"\\'")}','${(s.password||'').replace(/'/g,"\\'")}')">编辑</button>
+          <button class="btn-sm" style="color:var(--coral);border-color:#f0997b" onclick="deleteAdminStudent('${s.id}','${s.name.replace(/'/g,"\\'")}')">删除</button>
+        </td>
+      </tr>`).join('');
+    }).catch(e=>{ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--coral);padding:24px">加载出错</td></tr>'; });
+}
+
+// ── 普通管理员修改密码 ──
+async function submitNormalAdminChangePwd(){
+  var oldPwd=document.getElementById('nap_oldPwd').value;
+  var newPwd=document.getElementById('nap_newPwd').value;
+  var confirmPwd=document.getElementById('nap_confirmPwd').value;
+  var errEl=document.getElementById('nap_error');
+  if(!oldPwd){ errEl.textContent='请输入当前密码'; errEl.style.display='block'; return; }
+  if(!newPwd){ errEl.textContent='请输入新密码'; errEl.style.display='block'; return; }
+  if(newPwd!==confirmPwd){ errEl.textContent='两次输入的新密码不一致'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  try{
+    var {data:admins}=await db.from('users').select('password').eq('id',currentAdminId).limit(1);
+    if(!admins||admins.length===0||admins[0].password!==oldPwd){
+      errEl.textContent='当前密码错误'; errEl.style.display='block'; return;
+    }
+    await db.from('users').update({password:newPwd}).eq('id',currentAdminId);
+    toast('密码修改成功');
+    document.getElementById('nap_oldPwd').value='';
+    document.getElementById('nap_newPwd').value='';
+    document.getElementById('nap_confirmPwd').value='';
+  }catch(e){ errEl.textContent='修改失败: '+e.message; errEl.style.display='block'; }
+}
+
+// ── 邀请码管理 ──
+function openInviteCodeModal(){
+  document.getElementById('newInviteCode').textContent = '点击下方按钮生成';
+  openEditorModal('inviteCodeModal');
+}
+function generateInviteCode(){
+  var code = 'INV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+  document.getElementById('newInviteCode').textContent = code;
+  // 存入数据库
+  db.from('invitation_codes').insert({code, created_by: currentUserName, status:'active'})
+    .then(()=>{
+      loadInviteCodes();
+      toast('邀请码已生成');
+    })
+    .catch(e=>{ toast('生成失败: '+e.message); });
+}
+async function loadInviteCodes(){
+  var container = document.getElementById('inviteCodeList');
+  if(!container) return;
+  try{
+    var {data:codes} = await db.from('invitation_codes').select('*').order('created_at',{ascending:false});
+    if(!codes||codes.length===0){ container.innerHTML='<p style="font-size:13px;color:var(--gray-400);text-align:center;padding:12px">暂无邀请码</p>'; return; }
+    container.innerHTML = codes.map(c=>{
+      var statusColor = c.status==='active'?'var(--green)':c.status==='used'?'var(--blue)':'var(--coral)';
+      var statusText = c.status==='active'?'可用':c.status==='used'?'已使用（'+(c.used_by||'')+'）':'已撤销';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--gray-200)">
+        <div>
+          <span style="font-family:monospace;font-size:14px;font-weight:500;color:var(--gray-900)">${c.code}</span>
+          <span style="font-size:11px;color:${statusColor};margin-left:10px">${statusText}</span>
+        </div>
+        ${c.status==='active'?`<button class="btn-sm" style="color:var(--coral);border-color:#f0997b" onclick="revokeInviteCode('${c.id}')">撤销</button>`:''}
+      </div>`;
+    }).join('');
+  }catch(e){ container.innerHTML='<p style="color:var(--coral)">加载失败</p>'; }
+}
+async function revokeInviteCode(id){
+  if(!confirm('确定撤销此邀请码？')) return;
+  await db.from('invitation_codes').update({status:'revoked'}).eq('id',id);
+  loadInviteCodes();
+  toast('邀请码已撤销');
+}
+
+// ── 管理员列表（总管理员查看）──
+async function loadAdminList(){
+  var tbody = document.getElementById('superAdminBody');
+  if(!tbody) return;
+  try{
+    var {data:admins} = await db.from('users').select('*').eq('role','admin').order('created_at',{ascending:true});
+    if(!admins||admins.length===0){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">暂无子管理员</td></tr>'; return; }
+    // 过滤掉总管理员自己
+    var subAdmins = admins.filter(a=>!a.is_super);
+    if(subAdmins.length===0){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:24px">暂无子管理员</td></tr>'; return; }
+    tbody.innerHTML = subAdmins.map(async function(a){
+      // 获取该管理员被分配的班级
+      var {data:mappings} = await db.from('admin_class_mapping').select('class_code').eq('admin_id',a.id);
+      var classCodes = mappings?mappings.map(m=>m.class_code):[];
+      var classStr = classCodes.length>0?classCodes.join(', '):'<span style="color:var(--gray-400)">未分配</span>';
+      return `<tr>
+        <td><strong>${a.name}</strong></td>
+        <td>${classStr}</td>
+        <td style="font-size:12px;color:var(--gray-400)">${new Date(a.created_at).toLocaleDateString('zh-CN')}</td>
+        <td>
+          <button class="btn-sm" onclick="openAssignClassModal('${a.id}','${a.name.replace(/'/g,"\\'")}')">分配班级</button>
+          <button class="btn-sm" style="color:var(--coral);border-color:#f0997b" onclick="deleteSubAdmin('${a.id}','${a.name.replace(/'/g,"\\'")}')">删除</button>
+        </td>
+      </tr>`;
+    }).join('');
+    // 用 await Promise.all 处理异步
+    tbody.innerHTML = await Promise.all(subAdmins.map(async function(a){
+      var {data:mappings} = await db.from('admin_class_mapping').select('class_code').eq('admin_id',a.id);
+      var classCodes = mappings?mappings.map(m=>m.class_code):[];
+      var classStr = classCodes.length>0?classCodes.join(', '):'<span style="color:var(--gray-400)">未分配</span>';
+      return `<tr>
+        <td><strong>${a.name}</strong></td>
+        <td>${classStr}</td>
+        <td style="font-size:12px;color:var(--gray-400)">${new Date(a.created_at).toLocaleDateString('zh-CN')}</td>
+        <td>
+          <button class="btn-sm" onclick="openAssignClassModal('${a.id}','${a.name.replace(/'/g,"\\'")}')">分配班级</button>
+          <button class="btn-sm" style="color:var(--coral);border-color:#f0997b" onclick="deleteSubAdmin('${a.id}','${a.name.replace(/'/g,"\\'")}')">删除</button>
+        </td>
+      </tr>`;
+    }));
+  }catch(e){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--coral);padding:24px">加载出错</td></tr>'; }
+}
+
+// ── 分配班级弹窗 ──
+async function openAssignClassModal(adminId, adminName){
+  document.getElementById('ac_adminId').value = adminId;
+  document.getElementById('ac_adminName').textContent = '管理员：' + adminName;
+  document.getElementById('ac_error').style.display='none';
+  // 获取所有班级
+  try {
+    var {data:classes} = await db.from('class_config').select('class_code,teacher_name').order('class_code');
+    // 获取已分配的班级
+    var {data:mappings} = await db.from('admin_class_mapping').select('class_code').eq('admin_id',adminId);
+    var assignedCodes = mappings?mappings.map(m=>m.class_code):[];
+    var container = document.getElementById('ac_classCheckboxes');
+    container.innerHTML = classes.map(c=>{
+      var checked = assignedCodes.includes(c.class_code)?'checked':'';
+      return `<label style="display:flex;align-items:center;gap:8px;padding:8px;border:0.5px solid var(--gray-200);border-radius:var(--r-sm);cursor:pointer">
+        <input type="checkbox" value="${c.class_code}" ${checked} style="width:16px;height:16px">
+        <span><strong>${c.class_code}</strong> <span style="color:var(--gray-400);font-size:12px">- ${c.teacher_name}</span></span>
+      </label>`;
+    }).join('');
+    if(classes.length===0){
+      container.innerHTML='<p style="color:var(--gray-400);text-align:center;padding:12px">暂无班级，请先创建班级</p>';
+    }
+  } catch(e){
+    document.getElementById('ac_classCheckboxes').innerHTML='<p style="color:var(--coral)">加载班级失败</p>';
+  }
+  openEditorModal('assignClassModal');
+}
+async function saveAdminClassMapping(){
+  var adminId = document.getElementById('ac_adminId').value;
+  var checkboxes = document.querySelectorAll('#ac_classCheckboxes input[type=checkbox]');
+  var selectedCodes = [];
+  checkboxes.forEach(cb=>{ if(cb.checked) selectedCodes.push(cb.value); });
+  try {
+    // 先删除旧的
+    await db.from('admin_class_mapping').delete().eq('admin_id',adminId);
+    // 再插入新的
+    if(selectedCodes.length>0){
+      var inserts = selectedCodes.map(code=>({admin_id:adminId, class_code:code}));
+      await db.from('admin_class_mapping').insert(inserts);
+    }
+    closeEditorModal('assignClassModal');
+    loadAdminList();
+    toast('班级权限已更新');
+  } catch(e){
+    var errEl = document.getElementById('ac_error');
+    errEl.textContent='保存失败: '+e.message; errEl.style.display='block';
+  }
+}
+
+// ── 删除子管理员 ──
+async function deleteSubAdmin(id, name){
+  if(!confirm('确定删除管理员 '+name+'？其班级权限也将一并删除。')) return;
+  try {
+    await db.from('admin_class_mapping').delete().eq('admin_id',id);
+    await db.from('users').delete().eq('id',id);
+    loadAdminList();
+    toast('管理员已删除');
+  } catch(e){ toast('删除失败: '+e.message); }
+}
+
+// ── 页面切换（总管理员）──
 function switchAdminPage(id){
-  document.querySelectorAll('#adminApp .page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#superAdminPanel .page, #normalAdminPanel .page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.querySelectorAll('#adminApp .nav-tab').forEach((t,i)=>{
-    t.classList.toggle('active', ['a-teachers','a-students','a-password'][i]===id);
+  document.querySelectorAll('#adminNavTabs .nav-tab').forEach(t=>{
+    t.classList.toggle('active', t.getAttribute('onclick').includes(id));
   });
-  if(id==='a-teachers') loadAdminTeachers();
-  if(id==='a-students') loadAdminStudents();
+  if(id==='sa-admins'){ loadAdminList(); loadInviteCodes(); }
+  if(id==='sa-teachers') loadAdminTeachers();
+  if(id==='sa-students') loadAdminStudents();
+  if(id==='na-teachers') loadNormalAdminTeachers();
+  if(id==='na-students') loadNormalAdminStudents();
 }
 
 // ── 教师管理 ──
